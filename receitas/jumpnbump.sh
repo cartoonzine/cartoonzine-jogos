@@ -6,6 +6,7 @@ make -C data
 mkdir -p assets && cp data/jumpbump.dat assets/
 # 2) o jogo em WebAssembly
 sed -i 's/^\tranlib /\temranlib /' sdl/Makefile
+sed -i 's/ --closure 1//' Makefile   # o Closure do Emscripten novo recusa este código; sem ele o jogo é o mesmo, só um pouco maior
 sed -e "s#%%DATADIR%%#assets#g" < globals.pre > globals.h
 emmake make index.html CC=emcc SDL_CFLAGS="-sUSE_SDL=2 -sUSE_SDL_MIXER=2" SDL_LIBS="-sUSE_SDL=2" EXE=
 cp index.js index.wasm index.data "$SAIDA/"
