@@ -1,0 +1,91 @@
+name: Construir os cores do MAME (EmulatorJS)
+
+# Cada core é uma parte do MAME atual (nucleos/nucleos.json). Demora: rode só quando mudar a receita
+# ou quando sair MAME novo (Actions → "Construir os cores do MAME" → Run workflow).
+on:
+  workflow_dispatch:
+    inputs:
+      nucleo:
+        description: 'id do core (vazio = todos do nucleos.json)'
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths: ['nucleos/**', '.github/workflows/nucleos.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  lista:
+    runs-on: ubuntu-latest
+    outputs:
+      nucleos: ${{ steps.l.outputs.nucleos }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: |
+          so='${{ github.event.inputs.nucleo }}'
+          echo "nucleos=$(jq -c --arg so "$so" '[.nucleos[] | select($so == "" or .id == $so)]' nucleos/nucleos.json)" >> "$GITHUB_OUTPUT"
+
+  nucleo:
+    needs: lista
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        n: ${{ fromJson(needs.lista.outputs.nucleos) }}
+    container:
+      image: emscripten/emsdk:3.1.74
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ferramentas
+        run: |
+          apt-get update -q && apt-get install -y -q p7zip-full jq python3 git make
+          df -h / | tail -1; nproc; free -g | head -2
+      - name: Construir ${{ matrix.n.id }}
+        env:
+          ID: ${{ matrix.n.id }}
+          FONTES: ${{ matrix.n.fontes }}
+          SAIDA: ${{ github.workspace }}/saida/cores
+          OBRA: /tmp/obra
+          JOBS: 4
+        run: bash nucleos/mame.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core-${{ matrix.n.id }}
+          path: saida/cores
+          retention-days: 3
+
+  publicar:
+    # vai para gh-pages/cores/ (os jogos de lá não são mexidos)
+    needs: nucleo
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: core-*
+          path: artefatos
+      - name: Publicar em gh-pages/cores
+        run: |
+          ls -R artefatos 2>/dev/null | head -40 || true
+          git config user.name "cartoonzine-jogos[bot]"
+          git config user.email "cartoonzine-jogos@users.noreply.github.com"
+          if git fetch -q --depth 1 origin gh-pages; then git worktree add -q site origin/gh-pages && (cd site && git checkout -q -B gh-pages);
+          else git worktree add -q --orphan -b gh-pages site; fi
+          mkdir -p site/cores/reports
+          for d in artefatos/core-*; do
+            [ -d "$d" ] || continue
+            cp -f "$d"/*.data site/cores/ 2>/dev/null || true
+            cp -f "$d"/reports/*.json site/cores/reports/ 2>/dev/null || true
+          done
+          cp -f nucleos/nucleos.json site/cores/nucleos.json
+          touch site/.nojekyll
+          cd site && git add -A && (git diff --cached --quiet && echo "nada novo" || (git commit -qm "cores do MAME: $(date -u +%F)" && git push -q origin gh-pages))

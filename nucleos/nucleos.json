@@ -1,0 +1,7 @@
+{
+  "_comentario": "Cores próprios do EmulatorJS feitos a partir do MAME atual (versão libretro). Cada core é uma PARTE do MAME: só os jogos das pastas em \"fontes\" (src/mame/<fabricante>). O app usa o core pelo nome (campo Core do jogo no Studio = id). Publicado em gh-pages/cores/.",
+  "mame": { "repo": "https://github.com/libretro/mame.git", "ref": "master" },
+  "nucleos": [
+    { "id": "mame_capcom", "nome": "MAME (Capcom)", "fontes": "src/mame/capcom" }
+  ]
+}

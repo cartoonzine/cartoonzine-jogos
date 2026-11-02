@@ -3,6 +3,7 @@ name: Construir e publicar os jogos
 on:
   push:
     branches: [main]
+    paths-ignore: ['nucleos/**', '.github/workflows/nucleos.yml']
   workflow_dispatch:
 
 permissions:
