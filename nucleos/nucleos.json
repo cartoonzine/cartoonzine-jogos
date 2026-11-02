@@ -5,7 +5,7 @@
   "nucleos": [
     { "id": "mame_capcom", "nome": "MAME · Capcom", "fase": 1, "construir": true, "jogos": 834, "exemplos": "Street Fighter, Final Fight, CPS1/CPS2/CPS3",
       "pastas": ["capcom"] },
-    { "id": "mame_snk", "nome": "MAME · SNK (Neo Geo)", "fase": 1, "construir": false, "jogos": 422, "exemplos": "Metal Slug, King of Fighters, Samurai Shodown",
+    { "id": "mame_snk", "nome": "MAME · SNK (Neo Geo)", "fase": 1, "construir": true, "jogos": 422, "exemplos": "Metal Slug, King of Fighters, Samurai Shodown",
       "pastas": ["snk"] },
     { "id": "mame_konami", "nome": "MAME · Konami", "fase": 1, "construir": false, "jogos": 835, "exemplos": "TMNT, X-Men, Simpsons, Gradius",
       "pastas": ["konami"] },

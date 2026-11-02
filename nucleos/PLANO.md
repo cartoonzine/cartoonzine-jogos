@@ -13,7 +13,7 @@ São **13.339 jogos de arcade** (contando as versões de cada jogo), tirados da 
 |---|---|---:|---|---|
 | **Fase 1 · os mais jogados** | | | | |
 | ✅ | `mame_capcom` | 834 | capcom | Street Fighter, Final Fight, CPS1/CPS2/CPS3 |
-| ⬜ | `mame_snk` | 422 | snk | Metal Slug, King of Fighters, Samurai Shodown |
+| ✅ | `mame_snk` | 422 | snk | Metal Slug, King of Fighters, Samurai Shodown |
 | ⬜ | `mame_konami` | 835 | konami | TMNT, X-Men, Simpsons, Gradius |
 | ⬜ | `mame_sega` | 1172 | sega | Out Run, Golden Axe, System 16/18/24/32 (Model 2/3 e Naomi são pesados) |
 | ⬜ | `mame_namco` | 501 | namco | Pac-Mania, Galaga 88, System 1/2 (System 22/23 são pesados) |
