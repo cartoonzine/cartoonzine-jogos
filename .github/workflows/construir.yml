@@ -1,0 +1,84 @@
+name: Construir e publicar os jogos
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  lista:
+    runs-on: ubuntu-latest
+    outputs:
+      jogos: ${{ steps.l.outputs.jogos }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: |
+          echo "jogos=$(jq -c '[.jogos[].id]' jogos.json)" >> "$GITHUB_OUTPUT"
+
+  jogo:
+    needs: lista
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        id: ${{ fromJson(needs.lista.outputs.jogos) }}
+    container:
+      image: ${{ matrix.id == 'neverball' && 'emscripten/emsdk:3.1.65' || 'emscripten/emsdk:3.1.74' }}
+      env:
+        GL4ES_COMMIT: "c9895df34cd466c23bc60c2bd3db3d87e98fcbe7"
+        GL4ES_DIR: "/opt/gl4es"
+        DEBIAN_FRONTEND: "noninteractive"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ferramentas
+        run: |
+          (command -v sudo >/dev/null || (apt-get update -q && apt-get install -y -q sudo))
+          sudo apt-get update -q && sudo apt-get install -y -q autoconf automake libtool unzip curl gcc make pkg-config git
+      - name: Compilar ${{ matrix.id }}
+        run: |
+          export RAIZ="$GITHUB_WORKSPACE" SAIDA="$GITHUB_WORKSPACE/saida/${{ matrix.id }}"
+          mkdir -p "$SAIDA" && mkdir -p /tmp/obra && cd /tmp/obra
+          bash -c ". '$RAIZ/receitas/${{ matrix.id }}.sh'"
+          test -f "$SAIDA/index.html"
+          du -sh "$SAIDA" && ls -la "$SAIDA"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jogo-${{ matrix.id }}
+          path: saida/${{ matrix.id }}
+          retention-days: 3
+
+  publicar:
+    needs: jogo
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: jogo-*
+          path: artefatos
+      - name: Montar o site
+        run: |
+          mkdir -p site
+          for d in artefatos/jogo-*; do [ -d "$d" ] && cp -r "$d" "site/${d#artefatos/jogo-}"; done
+          python3 modelo/indice.py jogos.json site
+          touch site/.nojekyll
+          du -sh site/*
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
