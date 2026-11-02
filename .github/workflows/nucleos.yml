@@ -16,10 +16,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   lista:
     runs-on: ubuntu-latest
@@ -66,6 +62,9 @@ jobs:
     # vai para gh-pages/cores/ (os jogos de lá não são mexidos)
     needs: nucleo
     if: ${{ always() && !cancelled() }}
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

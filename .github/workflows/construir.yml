@@ -9,10 +9,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   lista:
     runs-on: ubuntu-latest
@@ -61,6 +57,9 @@ jobs:
     # Jogo que falhou nesta rodada continua com a versão anterior que já está lá.
     needs: jogo
     if: ${{ always() && !cancelled() }}
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
