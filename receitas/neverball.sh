@@ -6,4 +6,6 @@ make -j"$(nproc)" sols
 ./emscripten/install-gl4es.sh
 make -j"$(nproc)" -f emscripten/ball.mk BUILD=release
 cp -r js/. "$SAIDA/"
+# Cartoonzine: abre direto no jogo (sem a tela "Play Now") e o jogo ocupa a tela toda do cartucho
+python3 "$RAIZ/modelo/neverball-direto.py" "$SAIDA/index.html"
 cp LICENSE.md "$SAIDA/LICENCA.txt"
