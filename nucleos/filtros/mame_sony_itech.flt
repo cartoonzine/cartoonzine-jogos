@@ -1,0 +1,16 @@
+// MAME · Sony ZN / Incredible Technologies / Atlus · MAME 0.289 · gerado por nucleos/gerar-plano.py a partir do src/mame/arcade.flt
+atlus/cave.cpp
+-cellage
+atlus/ohmygod.cpp
+atlus/patapata.cpp
+itech/capbowl.cpp
+itech/iteagle.cpp
+itech/itech32.cpp
+itech/itech8.cpp
+-slikshot
+-slikshot16
+-slikshot17
+-stratabs
+sony/taitogn.cpp
+sony/zn.cpp
+-beastrzrb

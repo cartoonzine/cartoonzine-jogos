@@ -1,13 +1,17 @@
 #!/bin/bash
 # Constrói UM core do EmulatorJS a partir do MAME atual (versão libretro), só com uma parte dos jogos.
-#   ID=mame_capcom FONTES=src/mame/capcom SAIDA=/pasta/de/saida bash mame.sh
+#   ID=mame_capcom SAIDA=/pasta/de/saida bash mame.sh
+#   (os jogos vêm de nucleos/filtros/<ID>.flt; ou FONTES=src/mame/capcom para compilar uma pasta inteira)
 # Passos (iguais aos do build oficial do EmulatorJS, github.com/EmulatorJS/build):
 #   1. MAME libretro → <ID>_libretro_emscripten.bc  (emmake make -f Makefile.libretro platform=emscripten)
 #   2. RetroArch do EmulatorJS junta o core → <ID>-legacy-wasm.data (o arquivo que o EmulatorJS baixa)
 #   3. core.json + license.txt + build.json dentro do .data, e o relatório reports/<ID>.json
 set -euo pipefail
-: "${ID:?falta ID}" "${FONTES:?falta FONTES}" "${SAIDA:?falta SAIDA}"
+: "${ID:?falta ID}" "${SAIDA:?falta SAIDA}"
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FILTRO="${FILTRO:-$AQUI/filtros/$ID.flt}"
+FONTES="${FONTES:-}"
+if [ -z "$FONTES" ] && [ ! -f "$FILTRO" ]; then echo "sem filtro ($FILTRO) e sem FONTES"; exit 1; fi
 OBRA="${OBRA:-/tmp/obra-$ID}"
 MAME_REPO="${MAME_REPO:-https://github.com/libretro/mame.git}"
 MAME_REF="${MAME_REF:-master}"
@@ -24,11 +28,13 @@ echo "MAME $VERSAO · $(git log -1 --format='%h %cd')"
 python3 "$AQUI/mame-web.py" .
 echo "::endgroup::"
 
-echo "::group::Compilar o MAME ($FONTES)"
 SUB="${ID#mame_}"
+if [ -n "$FONTES" ]; then QUAIS=(SOURCES="$FONTES"); DESC="$FONTES"
+else cp "$FILTRO" "cz-$ID.flt"; QUAIS=(SOURCEFILTER="cz-$ID.flt"); DESC="filtro $(grep -vc '^\s*\(//\|-\|$\)' "$FILTRO") arquivos"; fi
+echo "::group::Compilar o MAME ($DESC)"
 # sem DRC nativo (não existe para wasm), sem asm, 32 bits; o resto é o Makefile.libretro de sempre
 emmake make -f Makefile.libretro platform=emscripten \
-    SUBTARGET="$SUB" SOURCES="$FONTES" \
+    SUBTARGET="$SUB" "${QUAIS[@]}" \
     REGENIE=1 NOWERROR=1 VERBOSE=0 PYTHON_EXECUTABLE=python3 \
     PTR64=0 NOASM=1 FORCE_DRC_C_BACKEND=1 LIBRETRO_CPU= ARCHITECTURE= \
     OPTIMIZE="${OPTIMIZE:-2}" NO_USE_MIDI=1 NO_USE_PORTAUDIO=1 \
@@ -75,12 +81,12 @@ FIM="$(date -u -Is)"
 cat > core.json <<JSON
 { "name": "$ID", "extensions": ["zip", "7z"], "license": "COPYING", "repo": "$MAME_REPO",
   "options": { "settings": {}, "defaultWebGL2": false, "supportsMouse": false }, "save": false,
-  "mame": "$VERSAO", "fontes": "$FONTES" }
+  "mame": "$VERSAO", "fontes": "$DESC" }
 JSON
 cp mame/COPYING license.txt
 echo '{ "minimumEJSVersion": "4.3.0", "version": "2.0.3" }' > build.json
 7z a -t7z -bso0 "$DATA" ./core.json ./license.txt ./build.json
 cp "$DATA" "$SAIDA/"
-echo "{ \"core\": \"$ID\", \"mame\": \"$VERSAO\", \"fontes\": \"$FONTES\", \"buildStart\": \"$INICIO\", \"buildEnd\": \"$FIM\", \"options\": { \"defaultWebGL2\": false } }" > "$SAIDA/reports/$ID.json"
+echo "{ \"core\": \"$ID\", \"mame\": \"$VERSAO\", \"fontes\": \"$DESC\", \"buildStart\": \"$INICIO\", \"buildEnd\": \"$FIM\", \"options\": { \"defaultWebGL2\": false } }" > "$SAIDA/reports/$ID.json"
 ls -la "$SAIDA" "$SAIDA/reports"
 echo "::endgroup::"

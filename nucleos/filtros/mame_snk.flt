@@ -1,0 +1,25 @@
+// MAME · SNK (Neo Geo) · MAME 0.289 · gerado por nucleos/gerar-plano.py a partir do src/mame/arcade.flt
+snk/midas.cpp
+snk/neogeo.cpp
+-aes
+-mvstemp
+-ng_mv1
+-ng_mv1f
+-ng_mv1fz
+-ng_mv2f
+-ng_mv4f
+-stakwindev
+snk/neopcb.cpp
+snk/bbusters.cpp
+snk/dmndrby.cpp
+snk/drderby.cpp
+snk/hng64.cpp
+snk/lasso.cpp
+snk/mainsnk.cpp
+snk/mechatt.cpp
+snk/miconkit.cpp
+snk/munchmo.cpp
+snk/prehisle.cpp
+snk/snk.cpp
+snk/snk6502.cpp
+snk/snk68.cpp

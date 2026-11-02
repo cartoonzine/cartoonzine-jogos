@@ -28,19 +28,13 @@ Rodar só um jogo: *Actions → Construir e publicar os jogos → Run workflow* 
 
 ## 🕹️ Cores do MAME atual para o EmulatorJS (`nucleos/`)
 
-O MAME inteiro é grande demais para o navegador, então ele vira **vários cores, um por parte** (pasta de fabricante
-em `src/mame/<fabricante>`). Cada parte está em `nucleos/nucleos.json`:
+O MAME inteiro é grande demais para o navegador, então ele vira **21 cores, um por fabricante** (os pequenos juntos).
+O plano completo, com a ordem de construção e como separar as ROMs, está em **[nucleos/PLANO.md](nucleos/PLANO.md)**.
 
-| core | jogos | MAME |
-|---|---|---|
-| `mame_capcom` | Capcom (`src/mame/capcom`: CPS1, CPS2, CPS3, 1942, Ghosts'n Goblins…) | 0.289 |
-
-- **Construir:** Actions → *Construir os cores do MAME* → *Run workflow* (vazio = todos). Também roda sozinho quando
-  muda algo em `nucleos/`. Leva uns 30 minutos por parte. Sai em `gh-pages/cores/`.
-- **Parte nova:** acrescente uma linha em `nucleos.json` (ex.: `{ "id": "mame_snk", "nome": "MAME (SNK)", "fontes": "src/mame/snk" }`).
-  O id precisa começar com `mame_`.
-- **No app:** o jogo usa o core pelo campo *Core do emulador* do Studio (ex.: `mame_capcom`). A ROM precisa ser do
-  romset da mesma versão do MAME e o link tem que terminar com o nome do romset (`…/sf2.zip`).
-- Como é feito: `nucleos/mame-web.py` faz no MAME versão libretro os mesmos ajustes que o EmulatorJS fez no core
-  `same_cdi`; `nucleos/mame.sh` compila com o emscripten e junta com o RetroArch do EmulatorJS, igual ao
-  [build oficial](https://github.com/EmulatorJS/build).
+- `nucleos/nucleos.json`: a lista dos cores (`"construir": true` = o GitHub Actions constrói).
+- `nucleos/filtros/*.flt`: quais jogos entram em cada core (tirado do `src/mame/arcade.flt` oficial).
+- `nucleos/mapa-romsets.json`: romset → core. `nucleos/separar-roms.py` usa ele para separar uma pasta de ROMs.
+- `nucleos/gerar-plano.py`: refaz tudo isso quando sair MAME novo.
+- `nucleos/mame-web.py` + `nucleos/mame.sh`: compilam o MAME versão libretro com o emscripten e juntam com o RetroArch
+  do EmulatorJS (os mesmos ajustes que o EmulatorJS fez no core `same_cdi`; [build oficial](https://github.com/EmulatorJS/build)).
+- Sai em `gh-pages/cores/`; o `cartucho.html` do app busca de lá qualquer core que começa com `mame_`.
