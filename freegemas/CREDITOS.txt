@@ -1,0 +1,5 @@
+Freegemas (2010)
+Licença: GPL-2.0
+Código-fonte usado: https://github.com/midzer/freegemas/tree/emscripten
+Projeto original: https://github.com/JoseTomasTocino/freegemas
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.

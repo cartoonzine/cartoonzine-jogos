@@ -1,0 +1,5 @@
+OpenTyrian (1995)
+Licença: GPL-2.0 (motor) · Tyrian 2.1 freeware (dados)
+Código-fonte usado: https://github.com/midzer/opentyrian/tree/emscripten
+Projeto original: https://github.com/opentyrian/opentyrian
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.

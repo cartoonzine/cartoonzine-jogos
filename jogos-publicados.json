@@ -1,0 +1,97 @@
+{
+ "jogos": [
+  {
+   "id": "jumpnbump",
+   "nome": "Jump 'n Bump",
+   "ano": 1998,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/midzer/jumpnbump/tree/emscripten",
+   "original": "https://gitlab.com/LibreGames/jumpnbump",
+   "descricao": "Coelhinhos pulando na cabeça uns dos outros. Clássico multiplayer local (até 4 no mesmo teclado/controle).",
+   "controles": "teclado",
+   "teclas": "A=ArrowUp",
+   "generos": [
+    "Plataforma",
+    "Multiplayer"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/jumpnbump/"
+  },
+  {
+   "id": "opentyrian",
+   "nome": "OpenTyrian",
+   "ano": 1995,
+   "licenca": "GPL-2.0 (motor) · Tyrian 2.1 freeware (dados)",
+   "fonte": "https://github.com/midzer/opentyrian/tree/emscripten",
+   "original": "https://github.com/opentyrian/opentyrian",
+   "descricao": "Nave de tiro vertical clássica da Epic. Os dados do Tyrian 2.1 foram liberados como freeware.",
+   "controles": "teclado",
+   "teclas": "A=Space, B=Enter, START=Enter, SELECT=Escape",
+   "generos": [
+    "Tiro",
+    "Nave"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/opentyrian/"
+  },
+  {
+   "id": "vectoroids",
+   "nome": "Vectoroids",
+   "ano": 2001,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/midzer/vectoroids/tree/emscripten",
+   "original": "http://www.newbreedsoftware.com/vectoroids/",
+   "descricao": "Asteroids em vetor, de Bill Kendrick.",
+   "controles": "teclado",
+   "teclas": "A=Space, START=Enter",
+   "generos": [
+    "Arcade",
+    "Tiro"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/vectoroids/"
+  },
+  {
+   "id": "freegemas",
+   "nome": "Freegemas",
+   "ano": 2010,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/midzer/freegemas/tree/emscripten",
+   "original": "https://github.com/JoseTomasTocino/freegemas",
+   "descricao": "Junte 3 joias iguais. No estilo Bejeweled, ótimo para a família.",
+   "controles": "mouse",
+   "generos": [
+    "Puzzle"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/freegemas/"
+  },
+  {
+   "id": "xgalaga",
+   "nome": "XGalaga",
+   "ano": 1998,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/midzer/xgalaga-sdl/tree/emscripten",
+   "original": "https://github.com/frankzago/xgalaga-sdl",
+   "descricao": "Clone de Galaga: naves inimigas em formação, tiro sem parar.",
+   "controles": "teclado",
+   "teclas": "A=Space, START=Enter",
+   "generos": [
+    "Arcade",
+    "Tiro"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/xgalaga/"
+  },
+  {
+   "id": "neverball",
+   "nome": "Neverball",
+   "ano": 2003,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/Neverball/neverball",
+   "original": "https://neverball.org",
+   "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.",
+   "controles": "gamepad",
+   "generos": [
+    "Puzzle",
+    "Habilidade"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/neverball/"
+  }
+ ]
+}

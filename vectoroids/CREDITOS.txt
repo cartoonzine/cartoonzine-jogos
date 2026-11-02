@@ -1,0 +1,5 @@
+Vectoroids (2001)
+Licença: GPL-2.0
+Código-fonte usado: https://github.com/midzer/vectoroids/tree/emscripten
+Projeto original: http://www.newbreedsoftware.com/vectoroids/
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.

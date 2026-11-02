@@ -1,0 +1,5 @@
+XGalaga (1998)
+Licença: GPL-2.0
+Código-fonte usado: https://github.com/midzer/xgalaga-sdl/tree/emscripten
+Projeto original: https://github.com/frankzago/xgalaga-sdl
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.
