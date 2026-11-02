@@ -44,7 +44,8 @@ cd "$OBRA"
 cd RetroArch/emulatorjs
 rm -f ./*.bc
 emar -crs "${ID}_libretro_emscripten.bc" "$OBRA/mame/${BC#./}"
-# o MAME usa exceções (precisa do mesmo -fwasm-exceptions na hora de juntar) e bastante memória
+# o MAME usa exceções em WebAssembly: o RetroArch também compila com -fwasm-exceptions (senão o setjmp
+# dele fica no modo JavaScript e não junta com o do MAME) e bastante memória
 python3 - "$ID" <<'PY'
 import sys, re
 from pathlib import Path
@@ -53,7 +54,7 @@ mk = Path('../Makefile.emulatorjs'); s = mk.read_text()
 if 'CARTOONZINE-MAME' not in s:
     marca = 'ifneq (,$(findstring same_cdi,$(TARGET)))'
     assert marca in s, 'Makefile.emulatorjs mudou: não achei o bloco do same_cdi'
-    s = s.replace(marca, '# CARTOONZINE-MAME: cores do MAME atual (exceções em WebAssembly)\nifneq (,$(findstring mame_,$(TARGET)))\n   LDFLAGS += -fwasm-exceptions\nendif\n\n' + marca, 1)
+    s = s.replace(marca, '# CARTOONZINE-MAME: cores do MAME atual (exceções em WebAssembly)\nifneq (,$(findstring mame_,$(TARGET)))\n   CFLAGS += -fwasm-exceptions\n   CXXFLAGS += -fwasm-exceptions\n   LDFLAGS += -fwasm-exceptions\nendif\n\n' + marca, 1)
     mk.write_text(s)
 sh = Path('build-emulatorjs.sh'); t = sh.read_text()
 # memória grande e sem o 7-Zip do RetroArch (o MAME já traz o dele: os dois juntos dão "duplicate symbol")
