@@ -6,9 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -58,27 +56,28 @@ jobs:
           retention-days: 3
 
   publicar:
+    # o site pronto vai para o branch gh-pages (Settings → Pages → Deploy from a branch → gh-pages / root).
+    # Jogo que falhou nesta rodada continua com a versão anterior que já está lá.
     needs: jogo
     if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           pattern: jogo-*
           path: artefatos
-      - name: Montar o site
+      - name: Montar o site no branch gh-pages
         run: |
-          mkdir -p site
-          for d in artefatos/jogo-*; do [ -d "$d" ] && cp -r "$d" "site/${d#artefatos/jogo-}"; done
+          git config user.name "cartoonzine-jogos[bot]"
+          git config user.email "cartoonzine-jogos@users.noreply.github.com"
+          if git fetch -q --depth 1 origin gh-pages; then git worktree add -q site origin/gh-pages && (cd site && git checkout -q -B gh-pages);
+          else git worktree add -q --orphan -b gh-pages site; fi
+          for d in artefatos/jogo-*; do
+            [ -d "$d" ] || continue
+            id="${d#artefatos/jogo-}"; rm -rf "site/$id"; cp -r "$d" "site/$id"
+          done
           python3 modelo/indice.py jogos.json site
           touch site/.nojekyll
-          du -sh site/*
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - id: deploy
-        uses: actions/deploy-pages@v4
+          du -sh site/* || true
+          cd site && git add -A && (git diff --cached --quiet && echo "nada mudou" || (git commit -q -m "site: jogos compilados de ${GITHUB_SHA::7}" && git push -q origin gh-pages))
