@@ -56,9 +56,11 @@ if 'CARTOONZINE-MAME' not in s:
     s = s.replace(marca, '# CARTOONZINE-MAME: cores do MAME atual (exceções em WebAssembly)\nifneq (,$(findstring mame_,$(TARGET)))\n   LDFLAGS += -fwasm-exceptions\nendif\n\n' + marca, 1)
     mk.write_text(s)
 sh = Path('build-emulatorjs.sh'); t = sh.read_text()
-if idc not in t.split('largeHeap=(')[1].split(')')[0]:
-    t = t.replace('largeHeap=(', f'largeHeap=("{idc}" ', 1)
-    sh.write_text(t)
+# memória grande e sem o 7-Zip do RetroArch (o MAME já traz o dele: os dois juntos dão "duplicate symbol")
+for lista in ('largeHeap', 'no7Zip'):
+    if idc not in t.split(lista + '=(')[1].split(')')[0]:
+        t = t.replace(lista + '=(', f'{lista}=("{idc}" ', 1)
+sh.write_text(t)
 print('RetroArch ajustado para', idc)
 PY
 emmake ./build-emulatorjs.sh --clean --legacy
