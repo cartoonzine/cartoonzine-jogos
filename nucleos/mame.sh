@@ -28,7 +28,8 @@ echo "MAME $VERSAO · $(git log -1 --format='%h %cd')"
 python3 "$AQUI/mame-web.py" .
 echo "::endgroup::"
 
-SUB="${ID#mame_}"
+# o SUBTARGET não pode ter o nome de uma pasta do MAME (no filtro, cada pasta vira um bloco com o nome dela)
+SUB="$ID"
 if [ -n "$FONTES" ]; then QUAIS=(SOURCES="$FONTES"); DESC="$FONTES"
 else cp "$FILTRO" "cz-$ID.flt"; QUAIS=(SOURCEFILTER="cz-$ID.flt"); DESC="filtro $(grep -vc '^\s*\(//\|-\|$\)' "$FILTRO") arquivos"; fi
 echo "::group::Compilar o MAME ($DESC)"
