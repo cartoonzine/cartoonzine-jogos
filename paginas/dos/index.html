@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS-DOS · Cartoonzine</title>
+<!--
+  💾 CARTUCHO DOS do Cartoonzine
+  Abre um jogo de MS-DOS direto, em tela cheia, sem logo nem botões de emulador (como os jogos web).
+  Motor: js-dos 7 (DOSBox em WebAssembly, GPL-2.0), hospedado aqui mesmo em ./jsdos/.
+
+  Endereço:  .../dos/?jogo=<link do .zip ou .jsdos>
+    jogo    (obrigatório) .zip com os arquivos do jogo, ou um pacote .jsdos pronto (DOS.Zone / js-dos)
+    cmd     (opcional)    o comando que abre o jogo, ex.: KEEN4E.EXE  ou  "GAME.EXE -nosound"
+                          sem ele, a página escolhe sozinha: AUTORUN.BAT → o .exe/.com/.bat principal
+    pasta   (opcional)    pasta dentro do zip onde está o jogo (quando não dá para adivinhar)
+    ciclos  (opcional)    velocidade do processador do DOS: "auto", "max" ou um número (ex.: 20000)
+    name    (opcional)    nome do jogo (ajuda a escolher o .exe certo)
+    esticar (opcional)    1 = ocupa a tela toda (padrão: 4:3 no meio, com faixas pretas)
+-->
+<link rel="stylesheet" href="jsdos/emulators-ui/emulators-ui.css">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    /* a tela do DOS é 4:3: fica no meio, com faixas pretas, sem esticar (?esticar=1 ocupa a tela toda) */
+    #dos { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(100vw, 133.334vh); height: min(100vh, 75vw); background: #000; }
+    body.esticar #dos { left: 0; top: 0; transform: none; width: 100%; height: 100%; }
+    /* sem logo do js-dos: a camada de "carregando" dele fica escondida, a mensagem é a nossa */
+    #dos .emulator-loading, #dos .emulator-loader { display: none !important; }
+    #dos canvas { outline: none; }
+    #cz-msg {
+        position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; gap: 10px;
+        align-items: center; justify-content: center; background: #000; color: #ff2e8a;
+        font: 14px monospace; text-align: center; padding: 24px; transition: opacity .4s; pointer-events: none;
+    }
+    #cz-msg small { color: #6b7280; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+    #cz-msg.fim { opacity: 0; }
+    #cz-msg.erro { color: #f87171; }
+</style>
+<script src="jsdos/emulators/emulators.js"></script>
+<script src="jsdos/emulators-ui/emulators-ui.js"></script>
+</head>
+<body>
+<div id="dos"></div>
+<div id="cz-msg">💾 Ligando o MS-DOS...<small>cartucho dos</small></div>
+<script>
+(function () {
+    'use strict';
+    const p = new URLSearchParams(location.search);
+    const urlJogo = p.get('jogo') || p.get('url') || p.get('rom') || '';
+    const cmdPedido = (p.get('cmd') || p.get('dosrun') || '').trim();
+    const pastaPedida = (p.get('pasta') || '').trim().replace(/^[\\/]+|[\\/]+$/g, '');
+    const ciclos = (p.get('ciclos') || '').trim();
+    const nomeJogo = p.get('name') || p.get('nome') || '';
+    const msg = document.getElementById('cz-msg');
+    if (p.get('esticar') === '1') document.body.classList.add('esticar');
+    const avisar = (txt, sub, erro) => { msg.innerHTML = txt + (sub ? '<small>' + sub + '</small>' : ''); msg.classList.toggle('erro', !!erro); };
+    const log = (...a) => console.log('[Cartucho DOS]', ...a);
+
+    // ---------- lista os arquivos de um .zip (lê o "índice" do fim do arquivo, sem descompactar nada) ----------
+    function listarZip(b) {
+        const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+        let fimCd = -1;
+        for (let i = b.length - 22; i >= Math.max(0, b.length - 66000); i--) { if (dv.getUint32(i, true) === 0x06054b50) { fimCd = i; break; } }
+        if (fimCd < 0) return null;                                    // não é zip
+        let total = dv.getUint16(fimCd + 10, true), pos = dv.getUint32(fimCd + 16, true);
+        const nomes = [], dec = new TextDecoder('latin1');
+        for (let k = 0; k < total && pos + 46 <= b.length; k++) {
+            if (dv.getUint32(pos, true) !== 0x02014b50) break;
+            const nl = dv.getUint16(pos + 28, true), el = dv.getUint16(pos + 30, true), cl = dv.getUint16(pos + 32, true);
+            nomes.push(dec.decode(b.subarray(pos + 46, pos + 46 + nl)).replace(/\\/g, '/'));
+            pos += 46 + nl + el + cl;
+        }
+        return nomes.filter(n => n && !n.endsWith('/'));
+    }
+
+    // ---------- qual programa abre o jogo (mesma regra do cartucho.html do app) ----------
+    function escolher(arquivos, nome, pedido, pastaFixa) {
+        const lista = (arquivos || []).filter(f => /\.(exe|com|bat)$/i.test(f) && !/^(__MACOSX|\.jsdos)\//i.test(f) && f.split('/').length <= 3);
+        const base = (f) => f.split('/').pop();
+        const pasta = (f) => f.includes('/') ? f.slice(0, f.lastIndexOf('/')) : '';
+        if (pedido) {
+            const prog = pedido.split(/\s+/)[0].toUpperCase();
+            const achou = lista.find(f => base(f).toUpperCase() === prog || base(f).toUpperCase().replace(/\.[A-Z]+$/, '') === prog);
+            return { pasta: pastaFixa || (achou ? pasta(achou) : ''), cmd: pedido };
+        }
+        const naPasta = pastaFixa ? lista.filter(f => pasta(f).toLowerCase() === pastaFixa.toLowerCase()) : lista;
+        const auto = naPasta.find(f => /^autorun\.bat$/i.test(base(f)));
+        if (auto) return { pasta: pasta(auto), cmd: 'CALL AUTORUN.BAT' };
+        const fora = /^(setup|install|instal|uninst|config|setsound|sound|setcard|dos4gw|dos32a|cwsdpmi|pmodew|pkunzip|unzip|readme|catalog|order|vendor|go32|exe2bin|boot|imgsetup|dosbox)/i;
+        const cand = naPasta.filter(f => !fora.test(base(f)));
+        if (!cand.length) return pastaFixa ? { pasta: pastaFixa, cmd: '' } : null;
+        const palavras = String(nome || '').toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length >= 3);
+        const ext = { EXE: 3, COM: 2, BAT: 1 };
+        const nota = (f) => {
+            const b = base(f).toUpperCase().replace(/\.[A-Z]+$/, '');
+            let n = ext[base(f).split('.').pop().toUpperCase()] || 0;
+            if (b.length >= 3 && palavras.some(w => b.startsWith(w.slice(0, Math.min(w.length, b.length))) || w.startsWith(b))) n += 10;
+            n -= f.split('/').length - 1;                             // na raiz do zip ganha da subpasta
+            return n;
+        };
+        const melhor = cand.slice().sort((a, b) => nota(b) - nota(a) || a.length - b.length)[0];
+        return { pasta: pasta(melhor), cmd: /\.bat$/i.test(melhor) ? 'CALL ' + base(melhor) : base(melhor) };
+    }
+
+    // ---------- baixa o jogo (com a porcentagem na tela) ----------
+    async function baixar(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error('o link respondeu ' + r.status);
+        const total = +r.headers.get('content-length') || 0;
+        if (!r.body || !r.body.getReader) return new Uint8Array(await r.arrayBuffer());
+        const leitor = r.body.getReader(), partes = []; let tam = 0;
+        for (;;) {
+            const { done, value } = await leitor.read();
+            if (done) break;
+            partes.push(value); tam += value.length;
+            avisar('💾 Baixando o jogo... ' + (total ? Math.round(tam * 100 / total) + '%' : Math.round(tam / 1024) + ' KB'), nomeJogo || 'cartucho dos');
+        }
+        const b = new Uint8Array(tam); let o = 0;
+        for (const x of partes) { b.set(x, o); o += x.length; }
+        return b;
+    }
+
+    // ---------- monta o pacote do js-dos: o zip do jogo + o dosbox.conf com o comando que abre o jogo ----------
+    async function pacote(bytes) {
+        const nomes = listarZip(bytes);
+        if (!nomes) throw new Error('o arquivo não é um .zip nem um pacote .jsdos');
+        const jaEhPacote = nomes.some(n => /^\.jsdos\/dosbox\.conf$/i.test(n));
+        if (jaEhPacote && !cmdPedido && !ciclos) { log('pacote .jsdos pronto'); return bytes; }
+        const e = escolher(nomes, nomeJogo, cmdPedido, pastaPedida);
+        const b = await emulators.dosBundle();
+        const blob = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
+        b.extract(blob, '/');
+        if (ciclos) b.cycles(ciclos);
+        const linhas = [];
+        if (e && e.pasta) linhas.push('CD \\' + e.pasta.replace(/\//g, '\\'));
+        if (e && e.cmd) linhas.push(e.cmd);
+        b.autoexec(...linhas);
+        log(e && e.cmd ? 'abrindo ' + (e.pasta ? e.pasta + '\\' : '') + e.cmd : 'sem programa: fica no C:\\>');
+        const pronto = await b.toUint8Array(true);
+        URL.revokeObjectURL(blob);
+        return pronto;
+    }
+
+    async function ligar() {
+        if (!urlJogo) { avisar('⚠️ Nenhum jogo no link', 'use ?jogo=<link do .zip>', true); return; }
+        if (typeof emulators === 'undefined' || typeof emulatorsUi === 'undefined') throw new Error('o motor do DOS não carregou');
+        emulators.pathPrefix = new URL('jsdos/emulators/', location.href).href;
+        avisar('💾 Baixando o jogo...', nomeJogo || 'cartucho dos');
+        const bytes = await baixar(urlJogo);
+        avisar('💾 Preparando o MS-DOS...', nomeJogo || 'cartucho dos');
+        const bundle = await pacote(bytes);
+        const raiz = document.getElementById('dos');
+        const layers = emulatorsUi.dom.layers(raiz, {});
+        try { layers.hideLoadingLayer(); } catch (x) {}
+        const ci = await emulators.dosboxWorker(bundle);
+        try { emulatorsUi.graphics.webGl(layers, ci); } catch (x) { emulatorsUi.graphics._2d(layers, ci); }
+        let volume = emulatorsUi.sound.audioNode(ci);
+        emulatorsUi.controls.keyboard(layers, ci, {});
+        emulatorsUi.controls.mouse(false, 1, layers, ci);
+        try { layers.preventContextMenu(); } catch (x) {}
+        msg.classList.add('fim');
+        setTimeout(() => { msg.style.display = 'none'; }, 450);
+        const canvas = raiz.querySelector('canvas');
+        if (canvas) { canvas.tabIndex = 0; canvas.focus(); }
+        window.focus();
+        // 🎮 para o cartucho web do Cartoonzine (pausa, som, foto): fala igual a qualquer jogo web
+        window.czDos = {
+            ci,
+            pausar() { ci.pause(); }, continuar() { ci.resume(); },
+            mudo(ligar) { ligar ? ci.mute() : ci.unmute(); },
+            volume(v) { try { volume && volume(v); } catch (x) {} },
+            tecla(codigo) { ci.simulateKeyPress(codigo); }
+        };
+        log('rodando', ci.width() + 'x' + ci.height());
+    }
+
+    ligar().catch((er) => {
+        console.error('[Cartucho DOS]', er);
+        avisar('⚠️ Não deu para abrir o jogo', String(er && er.message || er), true);
+    });
+})();
+</script>
+</body>
+</html>

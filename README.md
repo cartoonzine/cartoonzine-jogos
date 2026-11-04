@@ -26,6 +26,21 @@ Cada pasta publicada tem `LICENCA.txt`, `CREDITOS.txt` e `FONTE.txt` (o commit e
 
 Rodar só um jogo: *Actions → Construir e publicar os jogos → Run workflow* e escreva o id.
 
+## 💾 Cartucho DOS (`paginas/dos/`)
+
+Abre jogos de **MS-DOS** direto, em tela cheia, sem logo nem botões de emulador (como os jogos web):
+
+```
+https://cartoonzine.github.io/cartoonzine-jogos/dos/?jogo=<link do .zip ou .jsdos>
+```
+
+- `jogo`: `.zip` com os arquivos do jogo, ou um pacote `.jsdos` (js-dos / DOS.Zone).
+- `cmd` (opcional): o comando que abre o jogo (ex.: `KEEN4E.EXE`). Sem ele a página escolhe sozinha
+  (`AUTORUN.BAT` → o `.exe`/`.com`/`.bat` principal). `pasta`, `ciclos` e `esticar=1` também são aceitos.
+- Motor: js-dos 7 (DOSBox em WebAssembly, GPL-2.0) em `paginas/dos/jsdos/` (veja `FONTE.txt`).
+- Os jogos **não** ficam neste repositório: a página só abre o link que o Cartoonzine passar.
+- Publicação: o workflow `paginas.yml` copia `paginas/*` para o `gh-pages` (não recompila os jogos).
+
 ## 🕹️ Cores do MAME atual para o EmulatorJS (`nucleos/`)
 
 O MAME inteiro é grande demais para o navegador, então ele vira **21 cores, um por fabricante** (os pequenos juntos).

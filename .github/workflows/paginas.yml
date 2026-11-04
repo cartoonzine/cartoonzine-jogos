@@ -1,0 +1,33 @@
+name: Publicar as páginas (cartucho DOS)
+
+# As páginas prontas de paginas/ (ex.: paginas/dos = cartucho DOS) vão direto para o gh-pages,
+# sem recompilar os jogos. Cada pasta de paginas/ vira https://cartoonzine.github.io/cartoonzine-jogos/<pasta>/
+on:
+  push:
+    branches: [main]
+    paths: ['paginas/**', '.github/workflows/paginas.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copiar para o gh-pages
+        run: |
+          git config user.name "cartoonzine-jogos[bot]"
+          git config user.email "cartoonzine-jogos@users.noreply.github.com"
+          git fetch -q --depth 1 origin gh-pages
+          git worktree add -q site origin/gh-pages && (cd site && git checkout -q -B gh-pages)
+          for d in paginas/*/; do
+            id="$(basename "$d")"; rm -rf "site/$id"; cp -r "$d" "site/$id"
+          done
+          touch site/.nojekyll
+          cd site && git add -A && (git diff --cached --quiet && echo "nada mudou" || (git commit -q -m "site: páginas de ${GITHUB_SHA::7}" && git push -q origin gh-pages))
