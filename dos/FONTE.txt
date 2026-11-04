@@ -1,0 +1,5 @@
+jsdos/ veio pronto do repositório oficial do js-dos, branch gh-pages, pasta v7/build/releases/latest/
+  https://github.com/caiiiycuk/js-dos  (commit 9bbc400f2f4a6e4ca0e582b7e91abf2b4d20b39f, 2026-09-28)
+  emulators/     ← v7/build/releases/latest/emulators/      (emulators.js, wdosbox.*, wlibzip.*)
+  emulators-ui/  ← v7/build/releases/latest/emulators-ui/   (emulators-ui.js/.css)
+Fonte do DOSBox usado pelo js-dos: https://github.com/caiiiycuk/js-dos (branch 7.xx) e https://www.dosbox.com

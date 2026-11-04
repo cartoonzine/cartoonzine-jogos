@@ -1,0 +1,6 @@
+Cartucho DOS do Cartoonzine
+- Motor: js-dos 7 (emulators 0.73.8 + emulators-ui 0.73.7), de Alexander Guryanov (caiiiycuk)
+  https://js-dos.com  ·  https://github.com/caiiiycuk/js-dos
+- js-dos usa o DOSBox (https://www.dosbox.com), compilado para WebAssembly.
+- Página (index.html): Cartoonzine.
+Os jogos NÃO ficam aqui: a página só abre o link do jogo que o Cartoonzine passar.
