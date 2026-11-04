@@ -11,6 +11,8 @@
 
   Endereço:  .../dos/?jogo=<link do .zip ou .jsdos>
     jogo    (obrigatório) .zip com os arquivos do jogo, ou um pacote .jsdos pronto (DOS.Zone / js-dos)
+                          também aceita o link da página do Internet Archive (archive.org/details/<id>):
+                          o .zip e o programa (emulator_start) vêm da API do Archive
     cmd     (opcional)    o comando que abre o jogo, ex.: KEEN4E.EXE  ou  "GAME.EXE -nosound"
                           sem ele, a página escolhe sozinha: AUTORUN.BAT → o .exe/.com/.bat principal
     pasta   (opcional)    pasta dentro do zip onde está o jogo (quando não dá para adivinhar)
@@ -47,8 +49,8 @@
     'use strict';
     const p = new URLSearchParams(location.search);
     const urlJogo = p.get('jogo') || p.get('url') || p.get('rom') || '';
-    const cmdPedido = (p.get('cmd') || p.get('dosrun') || '').trim();
-    const pastaPedida = (p.get('pasta') || '').trim().replace(/^[\\/]+|[\\/]+$/g, '');
+    let cmdPedido = (p.get('cmd') || p.get('dosrun') || '').trim();
+    let pastaPedida = (p.get('pasta') || '').trim().replace(/^[\\/]+|[\\/]+$/g, '');
     const ciclos = (p.get('ciclos') || '').trim();
     const nomeJogo = p.get('name') || p.get('nome') || '';
     const msg = document.getElementById('cz-msg');
@@ -102,8 +104,74 @@
         return { pasta: pasta(melhor), cmd: /\.bat$/i.test(melhor) ? 'CALL ' + base(melhor) : base(melhor) };
     }
 
-    // ---------- baixa o jogo (com a porcentagem na tela) ----------
-    async function baixar(url) {
+    // ---------- 🏛️ INTERNET ARCHIVE: aceita o link da página do jogo (archive.org/details/<id>) ----------
+    // A API do Archive diz qual arquivo é o jogo (emulator_ext) e qual programa abre (emulator_start).
+    function idDoArchive(u) {
+        const m = /^https?:\/\/(?:www\.)?archive\.org\/(?:details|embed|download|metadata)\/([^/?#]+)(?:\/([^?#]*))?/i.exec(String(u || ''));
+        if (!m) return null;
+        const dec = (x) => { try { return decodeURIComponent(x); } catch (e) { return x; } };
+        return { id: dec(m[1]), arquivo: m[2] ? dec(m[2]) : '' };
+    }
+    const umValor = (v) => Array.isArray(v) ? v[0] : v;
+    async function resolverArchive(u) {
+        const a = idDoArchive(u);
+        if (!a) return { url: u };
+        let meta = null;
+        try { const r = await fetch('https://archive.org/metadata/' + encodeURIComponent(a.id)); if (r.ok) meta = await r.json(); } catch (e) {}
+        if (!meta) { try { meta = JSON.parse(new TextDecoder().decode(await pedirAoApp('https://archive.org/metadata/' + encodeURIComponent(a.id)))); } catch (e) {} }
+        if (!meta || !Array.isArray(meta.files) || !meta.files.length) {
+            if (a.arquivo) return { url: u };
+            throw new Error('não achei o item "' + a.id + '" no Internet Archive');
+        }
+        const md = meta.metadata || {};
+        const ext = String(umValor(md.emulator_ext) || 'zip').replace(/^\./, '').toLowerCase();
+        let arq = a.arquivo ? meta.files.find(f => f.name === a.arquivo) : null;
+        if (!arq) {
+            const cands = meta.files.filter(f => /\.(zip|jsdos)$/i.test(f.name) && !/_(files|jp2|images)\.zip$/i.test(f.name));
+            const nota = (f) => (f.name.toLowerCase().endsWith('.' + ext) ? 4 : 0) + (f.source === 'original' ? 2 : 0) + (/\.jsdos$/i.test(f.name) ? 1 : 0);
+            arq = cands.sort((x, y) => nota(y) - nota(x) || (+y.size || 0) - (+x.size || 0))[0];
+        }
+        if (!arq) throw new Error('o item "' + a.id + '" do Archive não tem um .zip do jogo');
+        const caminho = arq.name.split('/').map(encodeURIComponent).join('/');
+        const r = {
+            url: 'https://archive.org/download/' + encodeURIComponent(a.id) + '/' + caminho,
+            direto: meta.d1 && meta.dir ? 'https://' + meta.d1 + meta.dir + '/' + caminho : '',
+            start: String(umValor(md.emulator_start) || '').trim()
+        };
+        log('Internet Archive:', a.id, '→', arq.name, r.start ? '· programa: ' + r.start : '');
+        return r;
+    }
+
+    // ---------- 🌉 o app baixa por mim (quando este navegador bloqueia o link: CORS do Archive e afins) ----------
+    function pedirAoApp(url) {
+        return new Promise((ok, falha) => {
+            if (window.parent === window) return falha(new Error('o link bloqueou o download'));
+            const rid = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            const t = setTimeout(() => { removeEventListener('message', f); falha(new Error('o link bloqueou o download (e o app não respondeu)')); }, 120000);
+            const f = (ev) => {
+                const m = ev.data;
+                if (!m || m.czdos !== 1 || m.tipo !== 'arquivo' || m.rid !== rid) return;
+                clearTimeout(t); removeEventListener('message', f);
+                if (m.erro || !m.buf) return falha(new Error(m.erro || 'o app não conseguiu baixar'));
+                ok(new Uint8Array(m.buf));
+            };
+            addEventListener('message', f);
+            window.parent.postMessage({ czdos: 1, tipo: 'baixar', rid, url }, '*');
+        });
+    }
+
+    // ---------- baixa o jogo (com a porcentagem na tela): link → link direto do servidor → pelo app ----------
+    async function baixar(url, direto) {
+        let ultimo = null;
+        for (const u of [url, direto].filter(Boolean)) {
+            try { return await baixarDaqui(u); }
+            catch (er) { ultimo = er; log('não baixou daqui (' + (er && er.message) + '): ' + u); if (/respondeu 4\d\d/.test(String(er && er.message))) break; }
+        }
+        avisar('💾 Baixando o jogo pelo app...', nomeJogo || 'cartucho dos');
+        try { return await pedirAoApp(url); }
+        catch (er) { throw (ultimo && /respondeu/.test(ultimo.message)) ? ultimo : er; }
+    }
+    async function baixarDaqui(url) {
         const r = await fetch(url);
         if (!r.ok) throw new Error('o link respondeu ' + r.status);
         const total = +r.headers.get('content-length') || 0;
@@ -145,8 +213,16 @@
         if (!urlJogo) { avisar('⚠️ Nenhum jogo no link', 'use ?jogo=<link do .zip>', true); return; }
         if (typeof emulators === 'undefined' || typeof emulatorsUi === 'undefined') throw new Error('o motor do DOS não carregou');
         emulators.pathPrefix = new URL('jsdos/emulators/', location.href).href;
+        avisar('💾 Procurando o jogo...', nomeJogo || 'cartucho dos');
+        const ia = await resolverArchive(urlJogo);
+        if (ia.start && !cmdPedido) {
+            // emulator_start do Archive: "JOGO.EXE", "PASTA/JOGO.EXE" ou "JOGO.EXE -opcao"
+            const partes = ia.start.replace(/\\/g, '/').split(/\s+/), prog = partes.shift();
+            if (prog.includes('/') && !pastaPedida) pastaPedida = prog.slice(0, prog.lastIndexOf('/'));
+            cmdPedido = [prog.split('/').pop()].concat(partes).join(' ');
+        }
         avisar('💾 Baixando o jogo...', nomeJogo || 'cartucho dos');
-        const bytes = await baixar(urlJogo);
+        const bytes = await baixar(ia.url, ia.direto);
         avisar('💾 Preparando o MS-DOS...', nomeJogo || 'cartucho dos');
         const bundle = await pacote(bytes);
         const raiz = document.getElementById('dos');
