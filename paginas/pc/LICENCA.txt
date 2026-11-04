@@ -1,0 +1,3 @@
+O motor (pasta jsdos8/: js-dos, DOSBox, DOSBox-X) é software livre sob a GNU General Public License v2 (GPL-2.0).
+Texto da licença: jsdos8/LICENSE  ·  https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Código-fonte: veja FONTE.txt.

@@ -1,0 +1,7 @@
+Cartucho PC Classics do Cartoonzine
+- Motor: js-dos 8.5.3 (com emulators 8.5.x: DOSBox e DOSBox-X em WebAssembly), de Alexander Guryanov (caiiiycuk)
+  https://js-dos.com  ·  https://github.com/caiiiycuk/js-dos
+- DOSBox-X: https://dosbox-x.com
+- Discos do Windows/sistema (sockdrive): servidor do js-dos (wss://sockdrive.js-dos.com), leitura gratuita.
+- Página (index.html): Cartoonzine.
+Os jogos NÃO ficam aqui: a página só abre o link do pacote .jsdos que o Cartoonzine passar.
