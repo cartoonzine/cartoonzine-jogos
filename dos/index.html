@@ -234,10 +234,26 @@
         emulatorsUi.controls.keyboard(layers, ci, {});
         emulatorsUi.controls.mouse(false, 1, layers, ci);
         try { layers.preventContextMenu(); } catch (x) {}
+        // ⌨️🎮 TECLADO E CONTROLE: o js-dos só escuta as teclas na área do jogo. Dentro do app o foco cai no
+        //    corpo da página (o app foca o cartucho; o controle → teclado manda as teclas para quem tem o foco),
+        //    então as teclas que chegam fora da área do jogo também vão para o DOS, e o foco volta para o jogo.
+        const paraDos = emulatorsUi.controls.domToKeyCode;
+        const dentro = (t) => !!(t && t.nodeType === 1 && raiz.contains(t));
+        ['keydown', 'keyup'].forEach((tipo) => window.addEventListener(tipo, (ev) => {
+            if (dentro(ev.target)) return;                            // já é da área do jogo: o js-dos cuida
+            const kc = paraDos(ev.keyCode || ev.which || 0);
+            if (!kc) return;
+            if (tipo === 'keydown') layers.fireKeyDown(kc); else layers.fireKeyUp(kc);
+            ev.preventDefault();
+        }, true));
+        const focarJogo = () => { try { if (!dentro(document.activeElement)) raiz.focus({ preventScroll: true }); } catch (x) {} };
+        window.addEventListener('focus', () => setTimeout(focarJogo, 0));
+        document.addEventListener('pointerdown', () => setTimeout(focarJogo, 0), true);
         msg.classList.add('fim');
         setTimeout(() => { msg.style.display = 'none'; }, 450);
         const canvas = raiz.querySelector('canvas');
-        if (canvas) { canvas.tabIndex = 0; canvas.focus(); }
+        if (canvas) canvas.tabIndex = -1;
+        focarJogo();
         window.focus();
         // 🎮 para o cartucho web do Cartoonzine (pausa, som, foto): fala igual a qualquer jogo web
         window.czDos = {
