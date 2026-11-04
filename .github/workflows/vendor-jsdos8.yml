@@ -1,0 +1,38 @@
+name: Baixar o js-dos 8 (para o cartucho PC Classics)
+
+# Baixa o js-dos 8 oficial do npm (versão fixa) e guarda os arquivos prontos no branch "vendor-jsdos8".
+# Dali eles são conferidos e copiados para paginas/pc/ (o cartucho PC Classics hospeda o motor aqui mesmo).
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/vendor-jsdos8.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Baixar do npm
+        run: |
+          mkdir -p /tmp/v && cd /tmp/v
+          npm view js-dos versions --json | tail -5
+          npm view js-dos@8 dependencies --json || true
+          npm pack js-dos@8.5.3
+          npm pack emulators@8 || true
+          ls -la
+          mkdir -p saida && for t in *.tgz; do n="${t%.tgz}"; mkdir -p "saida/$n" && tar xzf "$t" -C "saida/$n" --strip-components=1; done
+          find saida -maxdepth 4 | head -80
+          du -sh saida/*
+      - name: Guardar no branch vendor-jsdos8
+        run: |
+          cd /tmp/v/saida
+          git init -q && git checkout -q -b vendor-jsdos8
+          git config user.name "cartoonzine-jogos[bot]" && git config user.email "cartoonzine-jogos@users.noreply.github.com"
+          git add -A && git commit -q -m "js-dos 8 do npm"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" vendor-jsdos8
