@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC Classics · Cartoonzine</title>
+<!--
+  🖥️ CARTUCHO PC CLASSICS do Cartoonzine
+  Jogos antigos de PC (Windows 95/98, Windows 3.11 e DOS) direto, em tela cheia, sem logo nem botões.
+  Motor: js-dos 8 (DOSBox-X em WebAssembly, GPL-2.0), hospedado aqui mesmo em ./jsdos8/.
+  O Windows e os discos grandes vêm pelo "sockdrive" do js-dos (wss://sockdrive.js-dos.com), aos poucos.
+
+  Endereço:  .../pc/?jogo=<link do pacote .jsdos>
+    jogo     (obrigatório) pacote .jsdos (feito no Game Studio do js-dos, ou do DOS.Zone)
+    motor    (opcional)    dosboxX (padrão: Windows 9x) ou dosbox (jogos de DOS)
+    aspecto  (opcional)    AsIs, 4/3 (padrão), 16/10, 16/9, Fit
+    mouse    (opcional)    1 = prende o mouse no jogo (jogos de Windows que pedem)
+    name     (opcional)    nome do jogo (só para a tela de carregando)
+-->
+<link rel="stylesheet" href="jsdos8/js-dos.css">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #pc { position: absolute; inset: 0; width: 100%; height: 100%; background: #000; }
+    #cz-msg {
+        position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; gap: 10px;
+        align-items: center; justify-content: center; background: #000; color: #ff2e8a;
+        font: 14px monospace; text-align: center; padding: 24px; transition: opacity .4s; pointer-events: none;
+    }
+    #cz-msg small { color: #6b7280; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+    #cz-msg.fim { opacity: 0; }
+    #cz-msg.erro { color: #f87171; }
+</style>
+<script src="jsdos8/js-dos.js"></script>
+</head>
+<body>
+<div id="pc"></div>
+<div id="cz-msg">🖥️ Ligando o PC...<small>pc classics</small></div>
+<script>
+(function () {
+    'use strict';
+    const p = new URLSearchParams(location.search);
+    const urlJogo = p.get('jogo') || p.get('url') || p.get('rom') || '';
+    const motor = /^dosbox$/i.test(p.get('motor') || '') ? 'dosbox' : 'dosboxX';
+    const ASPECTOS = ['AsIs', '1/1', '5/4', '4/3', '16/10', '16/9', 'Fit'];
+    const aspecto = ASPECTOS.includes(p.get('aspecto')) ? p.get('aspecto') : '4/3';
+    const nomeJogo = p.get('name') || p.get('nome') || '';
+    const msg = document.getElementById('cz-msg');
+    const avisar = (txt, sub, erro) => { msg.innerHTML = txt + (sub ? '<small>' + sub + '</small>' : ''); msg.classList.toggle('erro', !!erro); msg.classList.remove('fim'); msg.style.display = ''; };
+    const esconder = () => { msg.classList.add('fim'); setTimeout(() => { msg.style.display = 'none'; }, 450); };
+    const log = (...a) => console.log('[PC Classics]', ...a);
+
+    if (!urlJogo) { avisar('⚠️ Nenhum jogo no link', 'use ?jogo=<link do pacote .jsdos>', true); return; }
+    if (typeof window.Dos !== 'function') { avisar('⚠️ O motor do PC não carregou', 'js-dos', true); return; }
+    avisar('🖥️ Ligando o PC...', nomeJogo || 'pc classics');
+
+    // dentro do cartucho (um quadro) o navegador não deixa "travar o teclado": sem esse aviso de erro no console
+    try {
+        if (window.top !== window && window.Keyboard && Keyboard.prototype.lock) {
+            const travar = Keyboard.prototype.lock;
+            Keyboard.prototype.lock = function () { try { return travar.apply(this, arguments).catch(() => {}); } catch (x) { return Promise.resolve(); } };
+        }
+    } catch (x) {}
+
+    let ci = null;
+    const props = window.Dos(document.getElementById('pc'), {
+        url: urlJogo,
+        pathPrefix: new URL('jsdos8/emulators/', location.href).href,
+        backend: motor,
+        backendLocked: true,
+        autoStart: true,          // sem o botão "play"
+        kiosk: true,              // sem barra lateral, logo ou botões do js-dos
+        noCloud: true,            // sem login / nuvem do js-dos
+        theme: 'dark',
+        lang: 'en',
+        renderAspect: aspecto,
+        imageRendering: 'pixelated',
+        mouseCapture: p.get('mouse') === '1',
+        fastForwardOnBoot: true,  // o Windows liga mais rápido
+        onEvent: (ev, arg) => {
+            log('evento', ev);
+            if (ev === 'emu-ready') avisar('🖥️ Baixando o jogo...', nomeJogo || 'pc classics');
+            if (ev === 'ci-ready') {
+                ci = arg;
+                esconder();
+                // 🎮 para o cartucho web do Cartoonzine (pausa, som): fala igual a qualquer jogo web
+                window.czDos = {
+                    ci, props,
+                    pausar() { try { props.setPaused(true); } catch (x) { ci.pause(); } },
+                    continuar() { try { props.setPaused(false); } catch (x) { ci.resume(); } },
+                    mudo(ligar) { ligar ? ci.mute() : ci.unmute(); },
+                    volume(v) { try { props.setVolume(v); } catch (x) {} }
+                };
+                try { window.focus(); } catch (x) {}
+            }
+        }
+    });
+    window.czPC = props;
+    // se nada aparecer em 3 minutos, avisa (link errado, sem internet para o disco do Windows...)
+    setTimeout(() => { if (!ci) avisar('⚠️ O jogo não abriu', 'confira o link do pacote .jsdos e a internet', true); }, 180000);
+})();
+</script>
+</body>
+</html>

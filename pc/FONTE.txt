@@ -1,0 +1,5 @@
+jsdos8/ é o pacote oficial do npm js-dos@8.5.3 (pasta dist/), o mesmo da release
+  https://github.com/caiiiycuk/js-dos/releases/tag/v8.5.3
+Baixado pelo workflow .github/workflows/vendor-jsdos8.yml (branch vendor-jsdos8, commit d48801e2d951aecd8cb32b81a2ab013ebbf856a2).
+Ficaram de fora só os arquivos de depuração (-dbg, .symbols, .map) e o explorador de arquivos.
+Fonte: https://github.com/caiiiycuk/js-dos (branch 8.xx) e https://github.com/caiiiycuk/emulators (branch 8.xx)
