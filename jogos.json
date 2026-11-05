@@ -19,7 +19,6 @@
     { "id": "neverball", "nome": "Neverball", "ano": 2003, "licenca": "GPL-2.0", "fonte": "https://github.com/Neverball/neverball", "original": "https://neverball.org",
       "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] },
     { "id": "astromenace", "nome": "Astromenace", "ano": 2023, "licenca": "GPL-3.0", "fonte": "https://github.com/midzer/astromenace/tree/emscripten", "original": "https://github.com/midzer/astromenace", "descricao": "Hardcore 3D space scroll-shooter with spaceship upgrade possibilities ported for the web", "controles": "teclado", "generos": [], "rascunho": true },
-    { "id": "ssbu-port-web", "nome": "SSBU Port Web", "ano": 2026, "licenca": "GPL-3.0", "fonte": "https://github.com/longurara/SSBU-port-web", "original": "https://github.com/longurara/SSBU-port-web", "descricao": "", "controles": "teclado", "generos": [] },
-    { "id": "terraria-wasm", "nome": "Terraria Wasm", "ano": 2025, "licenca": "sem licença", "fonte": "https://github.com/MercuryWorkshop/terraria-wasm", "original": "https://github.com/MercuryWorkshop/terraria-wasm", "descricao": "Terraria ported to the browser with WebAssembly", "controles": "teclado", "generos": [] }
+
   ]
 }
