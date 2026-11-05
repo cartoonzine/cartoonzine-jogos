@@ -17,6 +17,7 @@
       "descricao": "Clone de Galaga: naves inimigas em formação, tiro sem parar.", "controles": "teclado", "teclas": "A=Space, START=Enter", "generos": ["Arcade", "Tiro"] },
     
     { "id": "neverball", "nome": "Neverball", "ano": 2003, "licenca": "GPL-2.0", "fonte": "https://github.com/Neverball/neverball", "original": "https://neverball.org",
-      "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] }
+      "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] },
+    { "id": "astromenace", "nome": "Astromenace", "ano": 2023, "licenca": "Other", "fonte": "https://github.com/midzer/astromenace/tree/emscripten", "original": "https://github.com/midzer/astromenace", "descricao": "Hardcore 3D space scroll-shooter with spaceship upgrade possibilities ported for the web", "controles": "teclado", "generos": [] }
   ]
 }
