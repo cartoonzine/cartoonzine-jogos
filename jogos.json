@@ -19,6 +19,6 @@
     { "id": "neverball", "nome": "Neverball", "ano": 2003, "licenca": "GPL-2.0", "fonte": "https://github.com/Neverball/neverball", "original": "https://neverball.org",
       "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] },
     { "id": "astromenace", "nome": "Astromenace", "ano": 2023, "licenca": "GPL-3.0", "fonte": "https://github.com/midzer/astromenace/tree/emscripten", "original": "https://github.com/midzer/astromenace", "descricao": "Hardcore 3D space scroll-shooter with spaceship upgrade possibilities ported for the web", "controles": "teclado", "generos": [], "rascunho": true },
-    { "id": "mazeofgalious", "nome": "Mazeofgalious", "ano": 2025, "licenca": "GPL-2.0", "fonte": "https://github.com/midzer/mazeofgalious/tree/emscripten", "original": "https://github.com/midzer/mazeofgalious", "descricao": "Originally a Konami game for the MSX computer system", "controles": "teclado", "generos": [] }
+    { "id": "mazeofgalious", "nome": "Maze of Galious", "ano": 2025, "licenca": "GPL-2.0", "fonte": "https://github.com/midzer/mazeofgalious/tree/emscripten", "original": "https://github.com/midzer/mazeofgalious", "descricao": "Originally a Konami game for the MSX computer system", "controles": "teclado", "generos": [] }
   ]
 }
