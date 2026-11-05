@@ -19,6 +19,8 @@
     ciclos  (opcional)    velocidade do processador do DOS: "auto", "max" ou um número (ex.: 20000)
     name    (opcional)    nome do jogo (ajuda a escolher o .exe certo)
     esticar (opcional)    1 = ocupa a tela toda (padrão: 4:3 no meio, com faixas pretas)
+    mouse   (opcional)    livre = a seta do jogo segue a do PC (padrão: preso — clique prende, Esc solta)
+    sensibilidade (opc.)  velocidade do mouse preso (0.2 a 4; padrão 1)
 -->
 <link rel="stylesheet" href="jsdos/emulators-ui/emulators-ui.css">
 <style>
@@ -37,6 +39,15 @@
     #cz-msg small { color: #6b7280; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
     #cz-msg.fim { opacity: 0; }
     #cz-msg.erro { color: #f87171; }
+    /* 🖱️ aviso do mouse preso (some sozinho) */
+    #cz-mouse {
+        position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; pointer-events: none;
+        background: rgba(0,0,0,.78); color: #fff; font: 600 12px Inter, system-ui, sans-serif; letter-spacing: .04em;
+        padding: 8px 14px; border-radius: 999px; box-shadow: 0 0 0 1px rgba(255,46,138,.6), 0 0 18px rgba(255,46,138,.35);
+        opacity: 0; transition: opacity .35s;
+    }
+    #cz-mouse.on { opacity: 1; }
+    #cz-mouse b { color: #ff2e8a; }
 </style>
 <script src="jsdos/emulators/emulators.js"></script>
 <script src="jsdos/emulators-ui/emulators-ui.js"></script>
@@ -52,6 +63,9 @@
     let cmdPedido = (p.get('cmd') || p.get('dosrun') || '').trim();
     let pastaPedida = (p.get('pasta') || '').trim().replace(/^[\\/]+|[\\/]+$/g, '');
     const ciclos = (p.get('ciclos') || '').trim();
+    // 🖱️ mouse: "preso" (padrão, como o DOSBox: clique na tela prende, Esc solta) ou "livre" (segue a seta do PC)
+    const mouseLivre = /^(livre|solto|0|nao|não)$/i.test(p.get('mouse') || '');
+    const sensib = Math.max(0.2, Math.min(4, parseFloat(p.get('sensibilidade') || '1') || 1));
     const nomeJogo = p.get('name') || p.get('nome') || '';
     const msg = document.getElementById('cz-msg');
     if (p.get('esticar') === '1') document.body.classList.add('esticar');
@@ -232,7 +246,28 @@
         try { emulatorsUi.graphics.webGl(layers, ci); } catch (x) { emulatorsUi.graphics._2d(layers, ci); }
         let volume = emulatorsUi.sound.audioNode(ci);
         emulatorsUi.controls.keyboard(layers, ci, {});
-        emulatorsUi.controls.mouse(false, 1, layers, ci);
+        // 🖱️ MOUSE PRESO: o jogo de DOS desenha a própria seta e só entende "o mouse andou tanto"; o modo livre
+        //    (posição da seta do PC) deixa as duas setas separadas e a do jogo parece travada. Preso = preciso.
+        emulatorsUi.controls.mouse(!mouseLivre, sensib, layers, ci);
+        if (!mouseLivre) {
+            const aviso = document.createElement('div');
+            aviso.id = 'cz-mouse';
+            aviso.innerHTML = '🖱️ <b>Clique</b> na tela para usar o mouse no jogo · <b>Esc</b> solta';
+            raiz.parentNode.appendChild(aviso);
+            let timer = 0;
+            const preso = () => document.pointerLockElement && raiz.contains(document.pointerLockElement) || document.pointerLockElement === raiz;
+            const mostrar = () => { if (preso()) return; aviso.classList.add('on'); clearTimeout(timer); timer = setTimeout(() => aviso.classList.remove('on'), 2600); };
+            let ux = null, uy = null;
+            // na fase de captura do documento: o js-dos segura o movimento do mouse antes de ele subir até aqui
+            const aoMover = (e) => {
+                const andou = ux === null ? 0 : Math.abs(e.clientX - ux) + Math.abs(e.clientY - uy);
+                ux = e.clientX; uy = e.clientY;
+                if (!preso() && andou > 2) mostrar();
+            };
+            document.addEventListener('mousemove', aoMover, true);
+            document.addEventListener('pointerlockchange', () => { if (preso()) aviso.classList.remove('on'); });
+            document.addEventListener('pointerlockerror', () => { log('o navegador não deixou prender o mouse'); });
+        }
         try { layers.preventContextMenu(); } catch (x) {}
         // ⌨️🎮 TECLADO E CONTROLE: o js-dos só escuta as teclas na área do jogo. Dentro do app o foco cai no
         //    corpo da página (o app foca o cartucho; o controle → teclado manda as teclas para quem tem o foco),
