@@ -12,3 +12,17 @@ moldurar() {       # moldurar <arquivo .js principal> <título>
   local js="$1" titulo="$2"
   sed -e "s#{{JS}}#${js}#g" -e "s#{{TITULO}}#${titulo}#g" "$RAIZ/modelo/moldura.html" > "$SAIDA/index.html"
 }
+# usado pelas receitas automáticas da Prateleira (Studio): acha o jogo compilado (.wasm + .js) numa pasta e publica
+publicar_saida() { # publicar_saida <pasta do build> <título>
+  local pasta="$1" titulo="$2" wasm base js
+  wasm=$(find "$pasta" -maxdepth 3 -name '*.wasm' -printf '%s %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
+  [ -n "$wasm" ] || { echo "não achei nenhum .wasm em $pasta"; exit 1; }
+  base="${wasm%.wasm}"; js="$base.js"; [ -f "$js" ] || js="$base"
+  [ -f "$js" ] || { echo "não achei o .js de $wasm"; exit 1; }
+  local nome; nome=$(basename "$base")
+  cp "$js" "$SAIDA/$nome.js"; cp "$wasm" "$SAIDA/$nome.wasm"
+  for x in data worker.js; do [ -f "$base.$x" ] && cp "$base.$x" "$SAIDA/$nome.$x"; done
+  moldurar "$nome.js" "$titulo"
+  local lic; lic=$(ls -1 COPYING* LICENSE* LICENCE* 2>/dev/null | head -1 || true)
+  [ -n "$lic" ] && cp "$lic" "$SAIDA/LICENCA.txt" || true
+}

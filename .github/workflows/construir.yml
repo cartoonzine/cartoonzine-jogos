@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: l
         run: |
-          echo "jogos=$(jq -c '[.jogos[].id]' jogos.json)" >> "$GITHUB_OUTPUT"
+          echo "jogos=$(jq -c '[.jogos[] | select(.rascunho != true) | .id]' jogos.json)" >> "$GITHUB_OUTPUT"
 
   jogo:
     needs: lista
