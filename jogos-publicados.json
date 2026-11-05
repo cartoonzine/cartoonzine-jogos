@@ -92,6 +92,18 @@
     "Habilidade"
    ],
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/neverball/"
+  },
+  {
+   "id": "mazeofgalious",
+   "nome": "Maze of Galious",
+   "ano": 2025,
+   "licenca": "GPL-2.0",
+   "fonte": "https://github.com/midzer/mazeofgalious/tree/emscripten",
+   "original": "https://github.com/midzer/mazeofgalious",
+   "descricao": "Originally a Konami game for the MSX computer system",
+   "controles": "teclado",
+   "generos": [],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/mazeofgalious/"
   }
  ]
 }

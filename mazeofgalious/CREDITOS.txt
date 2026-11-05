@@ -1,0 +1,5 @@
+Maze of Galious (2025)
+Licença: GPL-2.0
+Código-fonte usado: https://github.com/midzer/mazeofgalious/tree/emscripten
+Projeto original: https://github.com/midzer/mazeofgalious
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.
