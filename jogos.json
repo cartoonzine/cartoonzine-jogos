@@ -17,11 +17,6 @@
       "descricao": "Clone de Galaga: naves inimigas em formação, tiro sem parar.", "controles": "teclado", "teclas": "A=Space, START=Enter", "generos": ["Arcade", "Tiro"] },
     
     { "id": "neverball", "nome": "Neverball", "ano": 2003, "licenca": "GPL-2.0", "fonte": "https://github.com/Neverball/neverball", "original": "https://neverball.org",
-      "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] },
-    
-    { "id": "carmageddon-dethrace", "nome": "Carmageddon (Dethrace Web)", "ano": 1997, "licenca": "GPL-3.0", "fonte": "https://github.com/Carter54git/dethrace-ported-to-web", "original": "https://github.com/dethrace-labs/dethrace",
-      "descricao": "Port web do clássico jogo de corrida e combate veicular de 1997. Vença cruzando a linha de chegada, destruindo todos os oponentes ou atropelando os pedestres.","controles": "teclado / gamepad", 
-      "generos": ["Corrida", "Combate Veicular", "Ação"]
-}
+      "descricao": "Incline o tabuleiro e leve a bola até a saída pegando as moedas. Mais de 100 fases.", "controles": "gamepad", "generos": ["Puzzle", "Habilidade"] }
   ]
 }
