@@ -104,6 +104,37 @@
    "controles": "teclado",
    "generos": [],
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/mazeofgalious/"
+  },
+  {
+   "id": "powermanga",
+   "nome": "Powermanga",
+   "ano": 1999,
+   "licenca": "GPL-3.0",
+   "fonte": "https://github.com/midzer/powermanga/tree/emscripten",
+   "original": "https://linux.tlk.fr/games/Powermanga/",
+   "descricao": "Nave de tiro vertical com dezenas de fases, chefões e muitas armas para turbinar a nave.",
+   "controles": "teclado",
+   "teclas": "A=Space, B=Ctrl, START=Enter, SELECT=Escape",
+   "generos": [
+    "Tiro",
+    "Nave"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/powermanga/"
+  },
+  {
+   "id": "abuse",
+   "nome": "Abuse",
+   "ano": 1995,
+   "licenca": "Domínio público / GPL / WTFPL (código e dados) · sons de Bobby Prince com permissão de redistribuição",
+   "fonte": "https://github.com/midzer/abuse/tree/emscripten",
+   "original": "https://github.com/Xenoveritas/abuse",
+   "descricao": "Clássico de ação da Crack dot Com: um soldado sozinho contra mutantes numa prisão subterrânea.",
+   "controles": "teclado",
+   "generos": [
+    "Ação",
+    "Plataforma"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/abuse/"
   }
  ]
 }

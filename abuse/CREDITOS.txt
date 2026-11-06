@@ -1,0 +1,5 @@
+Abuse (1995)
+Licença: Domínio público / GPL / WTFPL (código e dados) · sons de Bobby Prince com permissão de redistribuição
+Código-fonte usado: https://github.com/midzer/abuse/tree/emscripten
+Projeto original: https://github.com/Xenoveritas/abuse
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.

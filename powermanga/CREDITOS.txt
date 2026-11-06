@@ -1,0 +1,5 @@
+Powermanga (1999)
+Licença: GPL-3.0
+Código-fonte usado: https://github.com/midzer/powermanga/tree/emscripten
+Projeto original: https://linux.tlk.fr/games/Powermanga/
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.

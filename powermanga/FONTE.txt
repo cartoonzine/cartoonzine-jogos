@@ -1,0 +1,1 @@
+commit 30cdd39e07e0b4f314d7eb7ee2644af7e10c6de6 de https://github.com/midzer/powermanga.git (emscripten)
