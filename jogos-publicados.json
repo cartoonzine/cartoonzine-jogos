@@ -122,6 +122,21 @@
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/powermanga/"
   },
   {
+   "id": "hurrican",
+   "nome": "Hurrican",
+   "ano": 2007,
+   "licenca": "Freeware (poke53280) · código aberto",
+   "fonte": "https://github.com/midzer/hurrican/tree/emscripten",
+   "original": "https://github.com/HurricanGame/Hurrican",
+   "descricao": "Ação e plataforma no estilo Turrican: explore fases enormes, atire em tudo e enfrente chefões gigantes.",
+   "controles": "gamepad",
+   "generos": [
+    "Ação",
+    "Plataforma"
+   ],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/hurrican/"
+  },
+  {
    "id": "abuse",
    "nome": "Abuse",
    "ano": 1995,
