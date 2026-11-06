@@ -1,7 +1,17 @@
 . "$RAIZ/receitas/comum.sh"
-# ⚙️ RECEITA AUTOMÁTICA (feita pela Prateleira da Studio) — tipo: visualstudio · já tem versão web
-# Se o robô falhar, ajuste aqui (dependências, opções do Emscripten, arquivos de dados) e tire o "rascunho" no jogos.json.
+# Bombermaaan (fork web do midzer) — o "guia" dele é um comentário no trunk/src/CMakeLists.txt. SDL 1.2.
+# O jogo procura os arquivos em data/images, data/sounds e data/levels.
 baixar_fonte https://github.com/midzer/Bombermaaan.git emscripten
 FONTE=$(pwd)
-# não reconheci como o jogo compila: escreva os comandos do Emscripten aqui
-echo "receita ainda não feita" && exit 1
+export EMCC_CFLAGS="-sUSE_SDL=1 -sUSE_SDL_MIXER=1"
+emcmake cmake -S trunk -B build -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_LIBRARY_OPTION=SDL
+cmake --build build -j"$(nproc)" -- -k || true
+unset EMCC_CFLAGS
+OBJ=$(dirname "$(find build -path '*CMakeFiles/Bombermaaan.dir/*' -name 'WinMain.cpp.o' | head -1)")
+TINY=$(find build -name 'libtinyxml.a' | head -1)
+emcc -O3 $(find "$OBJ" -name '*.o' | sort) "$TINY" -o index.html -sUSE_SDL=1 -sUSE_SDL_IMAGE=1 -sUSE_SDL_MIXER=1 -sASYNCIFY -sENVIRONMENT=web \
+  -sINITIAL_MEMORY=128mb -sSTACK_SIZE=524288 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sSTB_IMAGE=1 \
+  --preload-file "$FONTE/trunk/res/images@/data/images" --preload-file "$FONTE/trunk/res/sounds@/data/sounds" --preload-file "$FONTE/trunk/levels@/data/levels"
+cp index.js index.wasm index.data "$SAIDA/"
+moldurar index.js "Bombermaaan"
+cp "$FONTE/LICENSE.txt" "$SAIDA/LICENCA.txt"
