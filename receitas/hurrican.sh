@@ -2,6 +2,7 @@
 # Hurrican (fork web do midzer) — segue o EMSCRIPTEN.md do fork (ASYNCIFY completo: a lista funcs.txt é de um Emscripten antigo)
 baixar_fonte https://github.com/midzer/hurrican.git emscripten
 FONTE=$(pwd)
+git submodule update --init --depth 1 -q   # glm e scripts do SDL2 vêm como submódulos
 export EMCC_CFLAGS="-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS=[png] -sUSE_SDL_MIXER=2 -sSDL2_MIXER_FORMATS=[mod,wav]"
 mkdir -p Hurrican/build && cd Hurrican/build
 emcmake cmake -DCMAKE_BUILD_TYPE=Release -DRENDERER=GLES2 -DFBO=OFF -DOPENMPT=OFF -DFAST_RANDOM=ON -DFAST_TRIG=ON -DDISABLE_EXCEPTIONS=ON -DUSE_PRECOMPILED_HEADERS=OFF ..
