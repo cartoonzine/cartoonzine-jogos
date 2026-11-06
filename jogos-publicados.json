@@ -150,6 +150,18 @@
     "Plataforma"
    ],
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/abuse/"
+  },
+  {
+   "id": "bombermaaan",
+   "nome": "Bombermaaan",
+   "ano": 2023,
+   "licenca": "GPL-3.0",
+   "fonte": "https://github.com/midzer/Bombermaaan/tree/emscripten",
+   "original": "https://github.com/midzer/Bombermaaan",
+   "descricao": "Bombermaaan is inspired on the classic Bomberman game ported for the web",
+   "controles": "teclado",
+   "generos": [],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/bombermaaan/"
   }
  ]
 }
