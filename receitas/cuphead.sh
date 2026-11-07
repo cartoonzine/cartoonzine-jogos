@@ -1,7 +1,16 @@
 . "$RAIZ/receitas/comum.sh"
-# ⚙️ RECEITA AUTOMÁTICA (feita pela Prateleira da Studio) — tipo: desconhecido
-# Se o robô falhar, ajuste aqui (dependências, opções do Emscripten, arquivos de dados) e tire o "rascunho" no jogos.json.
+
 baixar_fonte https://github.com/web-ports/cuphead.git main
 FONTE=$(pwd)
-# não reconheci como o jogo compila: escreva os comandos do Emscripten aqui
-echo "receita ainda não feita" && exit 1
+
+# Este repositório já contém o build Unity WebGL; não há compilação Emscripten.
+cp -a "$FONTE/index.html" "$FONTE/Build" "$FONTE/TemplateData" "$SAIDA/"
+
+# O index original aponta para uma revisão do jogo no jsDelivr.
+# Remova esse <base> para carregar os arquivos da cópia publicada junto ao index.
+if grep -q '<base href="https://cdn.jsdelivr.net/gh/web-ports/cuphead@' "$SAIDA/index.html"; then
+  sed -i '/<base href="https:\/\/cdn.jsdelivr.net\/gh\/web-ports\/cuphead@/d' "$SAIDA/index.html"
+else
+  echo "Não encontrei a tag <base> esperada em index.html"
+  exit 1
+fi
