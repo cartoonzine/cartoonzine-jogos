@@ -3,5 +3,8 @@
 # Se o robô falhar, ajuste aqui (dependências, opções do Emscripten, arquivos de dados) e tire o "rascunho" no jogos.json.
 baixar_fonte https://github.com/woahhcrackers/GTA3Web.git main
 FONTE=$(pwd)
-# não reconheci como o jogo compila: escreva os comandos do Emscripten aqui
-echo "receita ainda não feita" && exit 1
+
+# O repositório já contém o build Emscripten; não recompilar.
+# Copie a árvore completa para o diretório de saída definido pela Prateleira.
+mkdir -p "$DESTINO"
+cp -a "$FONTE"/. "$DESTINO"/
