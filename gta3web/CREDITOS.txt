@@ -1,0 +1,5 @@
+GTA3Web (2026)
+Licença: sem licença
+Código-fonte usado: https://github.com/woahhcrackers/GTA3Web
+Projeto original: https://github.com/woahhcrackers/GTA3Web
+Compilado para a web pelo Cartoonzine (github.com/cartoonzine/cartoonzine-jogos), sem modificações no jogo.
