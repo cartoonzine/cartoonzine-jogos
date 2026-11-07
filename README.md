@@ -1,6 +1,6 @@
 # 🎮 Cartoonzine Jogos
 
-Prateleira de **jogos web livres** (código aberto) para o cartucho web do Cartoonzine.
+Prateleira de **jogos web** para o cartucho web do Cartoonzine.
 Cada jogo é **compilado do código-fonte original** pelo GitHub Actions e publicado sem propaganda em:
 
 ```
