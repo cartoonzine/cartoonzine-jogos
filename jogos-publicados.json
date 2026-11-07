@@ -162,6 +162,18 @@
    "controles": "teclado",
    "generos": [],
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/bombermaaan/"
+  },
+  {
+   "id": "cuphead",
+   "nome": "Cuphead",
+   "ano": 2025,
+   "licenca": "sem licença",
+   "fonte": "https://github.com/web-ports/cuphead",
+   "original": "https://github.com/web-ports/cuphead",
+   "descricao": "",
+   "controles": "teclado",
+   "generos": [],
+   "url": "https://cartoonzine.github.io/cartoonzine-jogos/cuphead/"
   }
  ]
 }
