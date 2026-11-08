@@ -88,7 +88,11 @@ test('preparar_ports_cmake: compila o port, confere o caminho e passa -DVAR; cam
     const cache = path.join(a.t, 'cache');
     fs.writeFileSync(path.join(a.bin, 'em-config'), `#!/bin/bash\necho ${cache}\n`, { mode: 0o755 });
     fs.writeFileSync(path.join(a.bin, 'embuilder'), `#!/bin/bash\nmkdir -p ${cache}/sysroot/include/SDL2 ${cache}/sysroot/lib/wasm32-emscripten && touch ${cache}/sysroot/lib/wasm32-emscripten/libSDL2.a\n`, { mode: 0o755 });
-    const out = roda(a, 'preparar_ports_cmake sdl2 naoexiste; printf "P=%s\\n" "${PORTS_CMAKE[@]}"');
+    const out = roda(a, 'preparar_ports_cmake sdl2 naoexiste SDL_LIB_DO_JOGO=lib:SDL2 SDL_INC=inc:sdl2; printf "P=%s\\n" "${PORTS_CMAKE[@]}"');
+    assert.match(out, new RegExp('P=-DSDL_LIB_DO_JOGO=' + cache + '/sysroot/lib/wasm32-emscripten/libSDL2\\.a\\n'));
+    assert.match(out, new RegExp('P=-DSDL_INC=' + cache + '/sysroot/include/SDL2\\n'));
+    assert.throws(() => roda(a, 'preparar_ports_cmake X=lib:naoexiste'), e => /REVISAO: X pede lib:naoexiste/.test(e.stdout.toString()));
+    assert.throws(() => roda(a, 'preparar_ports_cmake "A;B=lib:SDL2"'), e => /REVISAO: variável inválida/.test(e.stdout.toString()));
     assert.match(out, new RegExp('P=-DSDL2_INCLUDE_DIR=' + cache + '/sysroot/include/SDL2\\n'));
     assert.match(out, new RegExp('P=-DSDL2_LIBRARY=' + cache + '/sysroot/lib/wasm32-emscripten/libSDL2\\.a\\n'));
     fs.writeFileSync(path.join(a.bin, 'embuilder'), '#!/bin/bash\nexit 0\n', { mode: 0o755 });

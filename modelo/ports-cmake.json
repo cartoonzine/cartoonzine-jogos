@@ -1,7 +1,14 @@
 {
-  "_comentario": "Para projetos CMake que procuram a biblioteca 'instalada no sistema' (FindSDL2.cmake próprio etc.): onde o port do Emscripten fica depois de compilado. preparar_ports_cmake (receitas/comum.sh) compila o port com o embuilder, confere que os caminhos existem e passa como -DVAR=caminho. {cache} = em-config CACHE. Só entra o que está aqui.",
+  "_comentario": "Ports do Emscripten para projetos CMake que procuram a biblioteca 'no sistema' (FindSDL2.cmake próprio, FIND_LIBRARY/FIND_PATH). preparar_ports_cmake (receitas/comum.sh) compila o port com o embuilder, confere que cada caminho existe e passa -DVAR=caminho. 'cmake' = variáveis padrão; 'bibliotecas'/'include' = usados quando o PROJETO declara a variável (FIND_LIBRARY(VAR nome) → VAR=lib:nome, FIND_PATH(VAR cabeçalho) → VAR=inc:id). {cache} = em-config CACHE.",
   "ports": [
-    { "id": "sdl2", "embuilder": ["sdl2"],
-      "cmake": { "SDL2_INCLUDE_DIR": "{cache}/sysroot/include/SDL2", "SDL2_LIBRARY": "{cache}/sysroot/lib/wasm32-emscripten/libSDL2.a" } }
+    { "id": "sdl2", "embuilder": ["sdl2"], "include": "{cache}/sysroot/include/SDL2",
+      "bibliotecas": { "SDL2": "{cache}/sysroot/lib/wasm32-emscripten/libSDL2.a" },
+      "cmake": { "SDL2_INCLUDE_DIR": "{cache}/sysroot/include/SDL2", "SDL2_LIBRARY": "{cache}/sysroot/lib/wasm32-emscripten/libSDL2.a" } },
+    { "id": "ogg", "embuilder": ["ogg"], "include": "{cache}/sysroot/include",
+      "bibliotecas": { "ogg": "{cache}/sysroot/lib/wasm32-emscripten/libogg.a" }, "cmake": {} },
+    { "id": "vorbis", "embuilder": ["vorbis"], "include": "{cache}/sysroot/include",
+      "bibliotecas": { "vorbis": "{cache}/sysroot/lib/wasm32-emscripten/libvorbis.a", "vorbisfile": "{cache}/sysroot/lib/wasm32-emscripten/libvorbis.a" }, "cmake": {} },
+    { "id": "freetype", "embuilder": ["freetype"], "include": "{cache}/sysroot/include/freetype2",
+      "bibliotecas": { "freetype": "{cache}/sysroot/lib/wasm32-emscripten/libfreetype.a" }, "cmake": {} }
   ]
 }

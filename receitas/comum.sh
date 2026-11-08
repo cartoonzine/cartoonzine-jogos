@@ -136,13 +136,18 @@ dependencia_externa() {
 }
 
 # ---------------------------------------------------------------- ports para CMake que procura "biblioteca do sistema"
-# preparar_ports_cmake <id>...: compila o port (embuilder), confere os caminhos de modelo/ports-cmake.json e
-# põe em PORTS_CMAKE (array de -DVAR=caminho). Id sem entrada no arquivo é ignorado (o port continua pelas flags -s).
+# preparar_ports_cmake <id>... [VAR=lib:<nome>] [VAR=inc:<id>]
+#   <id>         compila o port (embuilder) e põe as variáveis padrão de modelo/ports-cmake.json
+#   VAR=lib:nome a variável que o PROJETO declarou num FIND_LIBRARY(VAR nome) recebe a .a do port
+#   VAR=inc:id   a variável de um FIND_PATH recebe a pasta de cabeçalhos do port
+# Tudo conferido (o caminho precisa existir); id sem entrada no arquivo é ignorado (o port segue pelas flags -s).
 PORTS_CMAKE=()
 preparar_ports_cmake() {
-  local man="$RAIZ/modelo/ports-cmake.json" cache id e k v
+  local man="$RAIZ/modelo/ports-cmake.json" cache id e k v a var tipo alvo
   cache=$(em-config CACHE)
-  for id in "$@"; do
+  local vars=() ids=()
+  for a in "$@"; do if [[ "$a" == *=* ]]; then vars+=("$a"); else ids+=("$a"); fi; done
+  for id in "${ids[@]}"; do
     e=$(jq -c --arg i "$id" '.ports[] | select(.id == $i)' "$man")
     [ -n "$e" ] || continue
     mapfile -t alvos < <(jq -r '.embuilder[]' <<<"$e")
@@ -152,6 +157,16 @@ preparar_ports_cmake() {
       [ -e "$v" ] || { echo "REVISAO: port $id compilado, mas não achei $v"; exit 1; }
       PORTS_CMAKE+=("-D$k=$v")
     done < <(jq -r '.cmake | to_entries[] | [.key, .value] | @tsv' <<<"$e")
+  done
+  for a in "${vars[@]}"; do
+    var="${a%%=*}"; tipo="${a#*=}"; alvo="${tipo#*:}"; tipo="${tipo%%:*}"
+    [[ "$var" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { echo "REVISAO: variável inválida $var"; exit 1; }
+    if [ "$tipo" = lib ]; then v=$(jq -r --arg n "$alvo" '[.ports[] | .bibliotecas[$n] // empty][0] // empty' "$man")
+    else v=$(jq -r --arg i "$alvo" '.ports[] | select(.id == $i) | .include // empty' "$man"); fi
+    [ -n "$v" ] || { echo "REVISAO: $var pede $tipo:$alvo, que não está em modelo/ports-cmake.json"; exit 1; }
+    v="${v//\{cache\}/$cache}"
+    [ -e "$v" ] || { echo "REVISAO: $var → $v não existe (o port foi compilado?)"; exit 1; }
+    PORTS_CMAKE+=("-D$var=$v")
   done
   echo "ports para o CMake: ${PORTS_CMAKE[*]:-(nenhum)}"
 }
