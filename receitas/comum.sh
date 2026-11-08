@@ -72,3 +72,46 @@ publicar_jogo() {
   if [ -f "$base.data" ]; then cp "$base.data" "$SAIDA/$nome.data"; fi
   if [ $# -gt 0 ]; then empacotar_dados "$@"; moldurar "$nome.js" "$titulo" dados.js; else moldurar "$nome.js" "$titulo"; fi
 }
+
+# ---------------------------------------------------------------- dependências externas (só do manifesto confiável)
+# dependencia_externa <id>: baixa o commit FIXO do modelo/dependencias-externas.json, compila para WebAssembly,
+# confere que os cabeçalhos e as bibliotecas declarados existem e acrescenta em:
+#   EXTERNAS_CFLAGS (-I…)   EXTERNAS_LIBS (caminhos .a)   EXTERNAS_CMAKE (array de -DVAR=valor)
+# Id fora do manifesto = para com REVISAO (não baixa nem roda nada que não esteja declarado).
+EXTERNAS_CFLAGS="${EXTERNAS_CFLAGS:-}"; EXTERNAS_LIBS="${EXTERNAS_LIBS:-}"; EXTERNAS_CMAKE=()
+dependencia_externa() {
+  local id="$1" man="$RAIZ/modelo/dependencias-externas.json" e
+  e=$(jq -c --arg i "$id" '.externas[] | select(.id == $i)' "$man")
+  [ -n "$e" ] || { echo "REVISAO: dependência externa '$id' não está no manifesto modelo/dependencias-externas.json"; exit 1; }
+  local repo commit build dir
+  repo=$(jq -r .repo <<<"$e"); commit=$(jq -r .commit <<<"$e"); build=$(jq -r .build <<<"$e")
+  [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "REVISAO: commit inválido no manifesto para $id"; exit 1; }
+  [ "$build" = cmake ] || { echo "REVISAO: build '$build' de $id sem suporte"; exit 1; }
+  dir="${DEPS:-/tmp/obra/deps}/$id"
+  rm -rf "$dir" && mkdir -p "$dir" && (
+    cd "$dir" && git init -q src && cd src && git remote add origin "$repo" &&
+    git fetch -q --depth 1 origin "$commit" && git checkout -q FETCH_HEAD && [ "$(git rev-parse HEAD)" = "$commit" ]
+  ) || { echo "REVISAO: não consegui baixar $id @ $commit"; exit 1; }
+  mapfile -t ops < <(jq -r '.opcoes[]' <<<"$e")
+  echo "== $id @ ${commit:0:12} ($(jq -r .licenca <<<"$e")) → cmake ${ops[*]}"
+  emcmake cmake -S "$dir/src" -B "$dir/build" -DCMAKE_BUILD_TYPE=Release "${ops[@]}"
+  cmake --build "$dir/build" -j"$(nproc)"
+  local inc h lib libs=""
+  inc="$dir/src/$(jq -r .include <<<"$e")"
+  while read -r h; do [ -f "$inc/$h" ] || { echo "REVISAO: $id compilou mas não tem o cabeçalho $h em $inc"; exit 1; }; done < <(jq -r '.cabecalhos[]' <<<"$e")
+  while read -r lib; do
+    local achou=""; [ -d "$dir/build" ] && achou=$(find "$dir/build" -name "$lib" -type f | head -1)
+    [ -n "$achou" ] && [ -s "$achou" ] || { echo "REVISAO: $id compilou mas não gerou $lib"; exit 1; }
+    libs="$libs $achou"
+  done < <(jq -r '.bibliotecas[]' <<<"$e")
+  EXTERNAS_CFLAGS="$EXTERNAS_CFLAGS -I$inc"
+  EXTERNAS_LIBS="$EXTERNAS_LIBS$libs"
+  local k v
+  while IFS=$'\t' read -r k v; do
+    v="${v//\{include\}/$inc}"
+    if [[ "$v" =~ \{lib:([^}]+)\} ]]; then v="${v//\{lib:${BASH_REMATCH[1]}\}/$(find "$dir/build" -name "${BASH_REMATCH[1]}" -type f | head -1)}"; fi
+    EXTERNAS_CMAKE+=("-D$k=$v")
+  done < <(jq -r '.cmake | to_entries[] | [.key, .value] | @tsv' <<<"$e")
+  echo "   include: $inc · libs:$libs"
+  echo "dependência $id $commit ($repo)" >> "$SAIDA/FONTE.txt"
+}

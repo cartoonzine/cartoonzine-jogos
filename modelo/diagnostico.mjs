@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 export const TABELA = JSON.parse(fs.readFileSync(path.join(AQUI, 'dependencias.json'), 'utf8')).dependencias;
+export const MANIFESTO = JSON.parse(fs.readFileSync(path.join(AQUI, 'dependencias-externas.json'), 'utf8')).externas;
 
 /** cabeçalho → dependência conhecida (ou null) */
 export function dependenciaDoCabecalho(h, tabela = TABELA) {
@@ -18,13 +19,15 @@ export function dependenciaDoCabecalho(h, tabela = TABELA) {
 const REGRAS = [
     { tipo: 'cabecalho', re: /^(.+?):(\d+):\d+: fatal error: '([^']+)' file not found/ },
     { tipo: 'biblioteca', re: /wasm-ld: error: unable to find library -l(\S+)/ },
-    { tipo: 'simbolo', re: /(?:wasm-ld: )?error: undefined symbol: (\S+)/ },
+    { tipo: 'simbolo', re: /error: (?:\S+: )?undefined symbol: (\S+)/ },
     { tipo: 'cmake', re: /Could NOT find (\S+?)\b.*\(missing: ([^)]+)\)/, soSeFatal: true },
     { tipo: 'cmake', re: /CMake Error.*?: (.+)$/ },
     { tipo: 'cmake', re: /Could not find a package configuration file provided by "([^"]+)"/ },
     { tipo: 'configure', re: /^configure: error: (.+)$/ },
     { tipo: 'closure', re: /JSC_UNDEFINED_VARIABLE\] variable (\S+) is undeclared/ },
     { tipo: 'git', re: /^fatal: (.+)$/ },
+    { tipo: 'make', re: /\*\*\* No rule to make target '([^']+)'/ },
+    { tipo: 'ferramenta', re: /(?:^|: )([\w.+-]+): (?:command )?not found$/ },
     { tipo: 'receita', re: /^(receita ainda não feita|não achei nenhum \.wasm.*|não achei o \.js.*|REVISAO: .+)$/ },
     { tipo: 'compilador', re: /^(.+?):(\d+):\d+: error: (.+)$/ }
 ];
@@ -41,8 +44,11 @@ export function diagnosticar(log, { max = 6 } = {}) {
             let p;
             if (r.tipo === 'cabecalho') {
                 const dep = dependenciaDoCabecalho(m[3]);
-                p = { tipo: 'dependencia-ausente', arquivo: m[1], linha: +m[2], cabecalho: m[3], dependencia: dep ? dep.id : null,
-                    mensagem: `Falta o arquivo de cabeçalho ${m[3]}` + (dep ? ` (${dep.nome}: ` + (dep.port ? `ligue o port ${dep.port.join(' ')})` : `sem port no Emscripten — ${dep.nota})`) : ' (dependência desconhecida: revisão necessária)') };
+                const ext = MANIFESTO.find(e => e.cabecalhos.includes(m[3]) || (dep && dep.externa === e.id));
+                p = { tipo: 'dependencia-ausente', arquivo: m[1], linha: +m[2], cabecalho: m[3], dependencia: dep ? dep.id : null, externa: ext ? ext.id : null,
+                    mensagem: `Falta o arquivo de cabeçalho ${m[3]}` + (dep && dep.port ? ` (${dep.nome}: ligue o port ${dep.port.join(' ')})`
+                        : ext ? ` (${ext.nome}: sem port no Emscripten; está no manifesto — acrescente "${ext.id}" em ajustes.externas para compilar ${ext.repo.replace(/^https:\/\/github.com\//, '').replace(/\.git$/, '')}@${ext.commit.slice(0, 7)})`
+                        : dep ? ` (${dep.nome}: sem port no Emscripten — ${dep.nota}; revisão necessária)` : ' (dependência desconhecida: revisão necessária)') };
             } else if (r.tipo === 'biblioteca') p = { tipo: 'dependencia-ausente', mensagem: `O link não achou a biblioteca -l${m[1]}: ela não existe no Emscripten (ligue o port certo ou compile na receita).` };
             else if (r.tipo === 'simbolo') p = { tipo: 'simbolo', mensagem: `Função/variável sem definição no link: ${m[1]} (falta uma biblioteca ou um arquivo no build).` };
             else if (r.tipo === 'cmake') p = { tipo: 'configuracao', mensagem: 'CMake: ' + m[1].trim() };
@@ -50,6 +56,8 @@ export function diagnosticar(log, { max = 6 } = {}) {
             else if (r.tipo === 'closure') p = { tipo: 'link', mensagem: `O Closure (otimizador de JS) não conhece "${m[1]}": exporte com -sEXPORTED_RUNTIME_METHODS ou tire o --closure.` };
             else if (r.tipo === 'git') p = { tipo: 'fonte', mensagem: 'git: ' + m[1].trim() };
             else if (r.tipo === 'receita') p = { tipo: 'receita', mensagem: m[1] };
+            else if (r.tipo === 'make') p = { tipo: 'compilacao', mensagem: `O make precisa de "${m[1]}", que não existe e não sabe gerar (costuma vir de uma ferramenta que falta, como msgfmt/gettext, ou de um passo fora do make).` };
+            else if (r.tipo === 'ferramenta') p = { tipo: 'configuracao', mensagem: `Programa "${m[1]}" não encontrado no ambiente de build.` };
             else p = { tipo: 'compilacao', arquivo: m[1], linha: +m[2], mensagem: `Erro de compilação em ${path.basename(m[1])}:${m[2]}: ${m[3].trim()}` };
             const chave = p.tipo + '|' + (p.cabecalho || p.mensagem);
             if (!vistos.has(chave)) { vistos.add(chave); achados.push(p); }

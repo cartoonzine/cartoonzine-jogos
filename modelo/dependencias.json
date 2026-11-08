@@ -1,27 +1,242 @@
 {
-  "_comentario": "Dependências conhecidas para o Emscripten. 'port' = opções que resolvem (null = não existe port: precisa de revisão humana / receita própria). 'cabecalhos' = .h que aparecem no erro 'file not found'. Usado por modelo/diagnostico.mjs; a Studio (core/prateleira-core.js) tem a mesma tabela para a análise.",
+  "_comentario": "Dependências conhecidas para o Emscripten. 'port' = opções que resolvem; null = não existe port; 'externa' = id no manifesto modelo/dependencias-externas.json (compilada na receita com commit fixo). 'cabecalhos' = .h que aparecem no erro 'file not found'. Usado por modelo/diagnostico.mjs; a Studio (core/prateleira-core.js) tem a mesma tabela para a análise.",
   "dependencias": [
-    { "id": "sdl2",       "nome": "SDL2",        "port": ["-sUSE_SDL=2"],                         "cabecalhos": ["SDL2/SDL.h", "SDL.h"] },
-    { "id": "sdl1",       "nome": "SDL 1.2",     "port": ["-sUSE_SDL=1"],                         "cabecalhos": ["SDL/SDL.h"] },
-    { "id": "sdl2_image", "nome": "SDL2_image",  "port": ["-sUSE_SDL_IMAGE=2"],                   "cabecalhos": ["SDL_image.h", "SDL2/SDL_image.h"] },
-    { "id": "sdl2_mixer", "nome": "SDL2_mixer",  "port": ["-sUSE_SDL_MIXER=2"],                   "cabecalhos": ["SDL_mixer.h", "SDL2/SDL_mixer.h"] },
-    { "id": "sdl2_ttf",   "nome": "SDL2_ttf",    "port": ["-sUSE_SDL_TTF=2"],                     "cabecalhos": ["SDL_ttf.h", "SDL2/SDL_ttf.h"] },
-    { "id": "sdl2_net",   "nome": "SDL2_net",    "port": ["-sUSE_SDL_NET=2"],                     "cabecalhos": ["SDL_net.h", "SDL2/SDL_net.h"] },
-    { "id": "sdl2_gfx",   "nome": "SDL2_gfx",    "port": ["-sUSE_SDL_GFX=2"],                     "cabecalhos": ["SDL2_gfxPrimitives.h", "SDL2_rotozoom.h", "SDL2/SDL2_gfxPrimitives.h"] },
-    { "id": "freetype",   "nome": "FreeType",    "port": ["-sUSE_FREETYPE=1"],                    "cabecalhos": ["ft2build.h"] },
-    { "id": "zlib",       "nome": "zlib",        "port": ["-sUSE_ZLIB=1"],                        "cabecalhos": ["zlib.h"] },
-    { "id": "libpng",     "nome": "libpng",      "port": ["-sUSE_LIBPNG=1"],                      "cabecalhos": ["png.h"] },
-    { "id": "libjpeg",    "nome": "libjpeg",     "port": ["-sUSE_LIBJPEG=1"],                     "cabecalhos": ["jpeglib.h"] },
-    { "id": "ogg",        "nome": "libogg",      "port": ["-sUSE_OGG=1"],                         "cabecalhos": ["ogg/ogg.h"] },
-    { "id": "vorbis",     "nome": "libvorbis",   "port": ["-sUSE_VORBIS=1"],                      "cabecalhos": ["vorbis/vorbisfile.h", "vorbis/codec.h"] },
-    { "id": "openal",     "nome": "OpenAL",      "port": ["-lopenal"],                            "cabecalhos": ["AL/al.h", "AL/alc.h"] },
-    { "id": "opengl",     "nome": "OpenGL (ES2/WebGL)", "port": ["-lGL"],                         "cabecalhos": ["GL/gl.h", "GLES2/gl2.h"] },
-    { "id": "alut",       "nome": "ALUT (freealut)", "port": null, "nota": "não faz parte do OpenAL do Emscripten: precisa compilar o freealut na receita", "cabecalhos": ["AL/alut.h"] },
-    { "id": "glu",        "nome": "GLU",         "port": null, "nota": "o Emscripten não tem GLU: precisa de uma implementação própria na receita", "cabecalhos": ["GL/glu.h"] },
-    { "id": "glew",       "nome": "GLEW",        "port": null, "nota": "confira se o projeto funciona com o GLEW emulado do Emscripten (-lGLEW)", "cabecalhos": ["GL/glew.h"] },
-    { "id": "boost",      "nome": "Boost",       "port": null, "nota": "sem port: precisa baixar/compilar na receita", "cabecalhos": ["boost/"] },
-    { "id": "lua",        "nome": "Lua",         "port": null, "nota": "sem port: o projeto precisa trazer a Lua junto (pasta própria) ou a receita compila", "cabecalhos": ["lua.h", "lua.hpp", "lauxlib.h"] },
-    { "id": "physfs",     "nome": "PhysicsFS",   "port": null, "nota": "sem port: precisa compilar na receita", "cabecalhos": ["physfs.h"] },
-    { "id": "glm",        "nome": "GLM",         "port": null, "nota": "biblioteca só de cabeçalhos: normalmente vem como submódulo git (ajuste 'submodulos')", "cabecalhos": ["glm/"] }
+    {
+      "id": "sdl2",
+      "nome": "SDL2",
+      "port": [
+        "-sUSE_SDL=2"
+      ],
+      "cabecalhos": [
+        "SDL2/SDL.h",
+        "SDL.h"
+      ]
+    },
+    {
+      "id": "sdl1",
+      "nome": "SDL 1.2",
+      "port": [
+        "-sUSE_SDL=1"
+      ],
+      "cabecalhos": [
+        "SDL/SDL.h"
+      ]
+    },
+    {
+      "id": "sdl2_image",
+      "nome": "SDL2_image",
+      "port": [
+        "-sUSE_SDL_IMAGE=2"
+      ],
+      "cabecalhos": [
+        "SDL_image.h",
+        "SDL2/SDL_image.h"
+      ]
+    },
+    {
+      "id": "sdl2_mixer",
+      "nome": "SDL2_mixer",
+      "port": [
+        "-sUSE_SDL_MIXER=2"
+      ],
+      "cabecalhos": [
+        "SDL_mixer.h",
+        "SDL2/SDL_mixer.h"
+      ]
+    },
+    {
+      "id": "sdl2_ttf",
+      "nome": "SDL2_ttf",
+      "port": [
+        "-sUSE_SDL_TTF=2"
+      ],
+      "cabecalhos": [
+        "SDL_ttf.h",
+        "SDL2/SDL_ttf.h"
+      ]
+    },
+    {
+      "id": "sdl2_net",
+      "nome": "SDL2_net",
+      "port": [
+        "-sUSE_SDL_NET=2"
+      ],
+      "cabecalhos": [
+        "SDL_net.h",
+        "SDL2/SDL_net.h"
+      ]
+    },
+    {
+      "id": "sdl2_gfx",
+      "nome": "SDL2_gfx",
+      "port": [
+        "-sUSE_SDL_GFX=2"
+      ],
+      "cabecalhos": [
+        "SDL2_gfxPrimitives.h",
+        "SDL2_rotozoom.h",
+        "SDL2/SDL2_gfxPrimitives.h"
+      ]
+    },
+    {
+      "id": "freetype",
+      "nome": "FreeType",
+      "port": [
+        "-sUSE_FREETYPE=1"
+      ],
+      "cabecalhos": [
+        "ft2build.h"
+      ]
+    },
+    {
+      "id": "zlib",
+      "nome": "zlib",
+      "port": [
+        "-sUSE_ZLIB=1"
+      ],
+      "cabecalhos": [
+        "zlib.h"
+      ]
+    },
+    {
+      "id": "libpng",
+      "nome": "libpng",
+      "port": [
+        "-sUSE_LIBPNG=1"
+      ],
+      "cabecalhos": [
+        "png.h"
+      ]
+    },
+    {
+      "id": "libjpeg",
+      "nome": "libjpeg",
+      "port": [
+        "-sUSE_LIBJPEG=1"
+      ],
+      "cabecalhos": [
+        "jpeglib.h"
+      ]
+    },
+    {
+      "id": "ogg",
+      "nome": "libogg",
+      "port": [
+        "-sUSE_OGG=1"
+      ],
+      "cabecalhos": [
+        "ogg/ogg.h"
+      ]
+    },
+    {
+      "id": "vorbis",
+      "nome": "libvorbis",
+      "port": [
+        "-sUSE_VORBIS=1"
+      ],
+      "cabecalhos": [
+        "vorbis/vorbisfile.h",
+        "vorbis/codec.h"
+      ]
+    },
+    {
+      "id": "openal",
+      "nome": "OpenAL",
+      "port": [
+        "-lopenal"
+      ],
+      "cabecalhos": [
+        "AL/al.h",
+        "AL/alc.h"
+      ]
+    },
+    {
+      "id": "opengl",
+      "nome": "OpenGL (ES2/WebGL)",
+      "port": [
+        "-lGL"
+      ],
+      "cabecalhos": [
+        "GL/gl.h",
+        "GLES2/gl2.h"
+      ]
+    },
+    {
+      "id": "alut",
+      "nome": "ALUT (freealut)",
+      "port": null,
+      "nota": "não faz parte do OpenAL do Emscripten; existe no manifesto: acrescente \"freealut\" em ajustes.externas",
+      "cabecalhos": [
+        "AL/alut.h"
+      ],
+      "externa": "freealut"
+    },
+    {
+      "id": "glu",
+      "nome": "GLU",
+      "port": null,
+      "nota": "o Emscripten não tem GLU: precisa de uma implementação própria na receita",
+      "cabecalhos": [
+        "GL/glu.h"
+      ]
+    },
+    {
+      "id": "glew",
+      "nome": "GLEW",
+      "port": null,
+      "nota": "confira se o projeto funciona com o GLEW emulado do Emscripten (-lGLEW)",
+      "cabecalhos": [
+        "GL/glew.h"
+      ]
+    },
+    {
+      "id": "boost",
+      "nome": "Boost",
+      "port": null,
+      "nota": "sem port: precisa baixar/compilar na receita",
+      "cabecalhos": [
+        "boost/"
+      ]
+    },
+    {
+      "id": "lua",
+      "nome": "Lua",
+      "port": null,
+      "nota": "sem port: o projeto precisa trazer a Lua junto (pasta própria) ou a receita compila",
+      "cabecalhos": [
+        "lua.h",
+        "lua.hpp",
+        "lauxlib.h"
+      ]
+    },
+    {
+      "id": "physfs",
+      "nome": "PhysicsFS",
+      "port": null,
+      "nota": "sem port: precisa compilar na receita",
+      "cabecalhos": [
+        "physfs.h"
+      ]
+    },
+    {
+      "id": "glm",
+      "nome": "GLM",
+      "port": null,
+      "nota": "biblioteca só de cabeçalhos: normalmente vem como submódulo git (ajuste 'submodulos')",
+      "cabecalhos": [
+        "glm/"
+      ]
+    },
+    {
+      "id": "gl4es",
+      "nome": "GL4ES",
+      "port": null,
+      "externa": "gl4es",
+      "nota": "camada OpenGL→WebGL; existe no manifesto: acrescente \"gl4es\" em ajustes.externas",
+      "cabecalhos": [
+        "gl4esinit.h",
+        "gl4eshint.h"
+      ]
+    }
   ]
 }

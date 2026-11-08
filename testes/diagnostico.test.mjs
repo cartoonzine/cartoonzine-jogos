@@ -40,3 +40,27 @@ test('tabela de dependências: as sem port ficam null (revisão)', () => {
     assert.equal(dependenciaDoCabecalho('meu.h'), null);
     for (const d of TABELA) assert.ok(d.port === null || d.port.every(f => /^(-s[A-Z0-9_]+=\w+|-l\w+)$/.test(f)), d.id);
 });
+
+test('regressão AstroMenace (2º erro): gl4esinit.h ausente = dependência externa do manifesto, sem sucesso falso', () => {
+    const d = diagnosticar(log('astromenace-gl4es.txt'));
+    assert.equal(d[0].tipo, 'dependencia-ausente');
+    assert.equal(d[0].externa, 'gl4es');
+    assert.match(d[0].mensagem, /acrescente "gl4es" em ajustes\.externas/);
+    assert.match(d[0].mensagem, /ptitSeb\/gl4es@c9895df/);
+    const a = diagnosticar(log('astromenace-alut.txt'));
+    assert.equal(a[0].externa, 'freealut');
+    assert.match(a[0].mensagem, /acrescente "freealut"/);
+});
+
+test('header no lugar não basta: símbolo não resolvido no link é falha', () => {
+    const d = diagnosticar(log('simbolo-indefinido.txt'));
+    assert.deepEqual(d.map(p => p.tipo), ['simbolo', 'simbolo']);
+    assert.match(d[0].mensagem, /gluPerspective/);
+});
+
+test('dependência fora da tabela e do manifesto = revisão; make sem regra; tudo explicado', () => {
+    const d = diagnosticar(log('desconhecida.txt'));
+    assert.equal(d[0].externa, null);
+    assert.match(d[0].mensagem, /enet\/enet\.h \(dependência desconhecida: revisão necessária\)/);
+    assert.match(diagnosticar(log('starfighter-make.txt'))[0].mensagem, /pr-starfighter\.mo/);
+});

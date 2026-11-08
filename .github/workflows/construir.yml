@@ -45,7 +45,7 @@ jobs:
       - name: Ferramentas
         run: |
           (command -v sudo >/dev/null || (apt-get update -q && apt-get install -y -q sudo))
-          sudo apt-get update -q && sudo apt-get install -y -q autoconf automake libtool unzip curl gcc make pkg-config git
+          sudo apt-get update -q && sudo apt-get install -y -q autoconf automake libtool unzip curl gcc make pkg-config git jq
       - name: Compilar ${{ matrix.id }}
         run: |
           export RAIZ="$GITHUB_WORKSPACE" SAIDA="$GITHUB_WORKSPACE/saida/${{ matrix.id }}"

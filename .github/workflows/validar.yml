@@ -70,6 +70,11 @@ jobs:
     name: compilar (${{ matrix.id }})
     container:
       image: emscripten/emsdk:${{ matrix.emsdk }}
+      env:
+        # iguais ao construir.yml: só a receita do Neverball usa (o emscripten/install-gl4es.sh do próprio Neverball lê
+        # GL4ES_COMMIT/GL4ES_DIR). Não fazem nada sozinhas: outras receitas usam o GL4ES pelo manifesto (dependencia_externa gl4es).
+        GL4ES_COMMIT: "c9895df34cd466c23bc60c2bd3db3d87e98fcbe7"
+        GL4ES_DIR: "/opt/gl4es"
     steps:
       - uses: actions/checkout@v4
         with:
