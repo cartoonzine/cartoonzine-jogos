@@ -16,3 +16,4 @@ publicar_jogo "$PASTA_BUILD" "astromenace" "Teste astromenace" "gamedata@/gameda
 for l in COPYING COPYING.txt LICENSE LICENSE.txt LICENSE.md LICENCE; do if [ -f "$FONTE/$l" ]; then cp "$FONTE/$l" "$SAIDA/LICENCA.txt"; break; fi; done
 
 
+
