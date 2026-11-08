@@ -109,7 +109,8 @@ dependencia_externa() {
     env "${amb[@]}" emcmake cmake -S "$dir/src" -B "$dir/build" -DCMAKE_BUILD_TYPE=Release "${ops[@]}"
     env "${amb[@]}" cmake --build "$dir/build" -j"$(nproc)"
   else
-    ( cd "$dir/src" && { [ -x configure ] || autoreconf -fi; } &&
+    local regen; regen=$(jq -r '.regenerarConfigure // false' <<<"$e")
+    ( cd "$dir/src" && { [ -x configure ] && [ "$regen" != true ] || autoreconf -fi; } &&
       env "${amb[@]}" emconfigure ./configure --host=wasm32-unknown-emscripten "${ops[@]}" &&
       env "${amb[@]}" emmake make -j"$(nproc)" )
   fi

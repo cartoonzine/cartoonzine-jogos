@@ -1,5 +1,5 @@
 {
-  "_comentario": "MANIFESTO CONFIÁVEL de dependências que não existem no Emscripten e são compiladas para WebAssembly na própria receita. Só o que está aqui pode ser baixado/compilado automaticamente (repositório + commit fixo + opções + licença). Mudança neste arquivo = revisão humana no PR. Usado por receitas/comum.sh (dependencia_externa), modelo/diagnostico.mjs e pela Prateleira da Studio. 'pastaBibliotecas' (opcional) = onde o projeto grava as .a, relativo ao código-fonte; sem ela, procura na pasta de build. 'requer' = outras externas que precisam vir antes (os {include:<id>} delas entram em 'ambiente'). build: cmake ou autotools.",
+  "_comentario": "MANIFESTO CONFIÁVEL de dependências que não existem no Emscripten e são compiladas para WebAssembly na própria receita. Só o que está aqui pode ser baixado/compilado automaticamente (repositório + commit fixo + opções + licença). Mudança neste arquivo = revisão humana no PR. Usado por receitas/comum.sh (dependencia_externa), modelo/diagnostico.mjs e pela Prateleira da Studio. 'pastaBibliotecas' (opcional) = onde o projeto grava as .a, relativo ao código-fonte; sem ela, procura na pasta de build. 'requer' = outras externas que precisam vir antes (os {include:<id>} delas entram em 'ambiente'). build: cmake ou autotools. 'regenerarConfigure' = roda autoreconf -fi antes (config.sub antigo que não conhece wasm32-unknown-emscripten).",
   "externas": [
     {
       "id": "freealut",
@@ -88,7 +88,8 @@
       ],
       "pastaBibliotecas": ".",
       "cmake": {},
-      "fonteDasOpcoes": "compilada com os cabeçalhos do gl4es: o GL/gl.h do gl4es define USE_MGL_NAMESPACE, então as funções saem como mglu* — os mesmos nomes que um jogo compilado com o gl4es procura no link"
+      "fonteDasOpcoes": "compilada com os cabeçalhos do gl4es: o GL/gl.h do gl4es define USE_MGL_NAMESPACE, então as funções saem como mglu* — os mesmos nomes que um jogo compilado com o gl4es procura no link; o config.sub do repositório é antigo e não conhece wasm32-unknown-emscripten (falhou no build real), então o configure é regenerado com o autoreconf do ambiente",
+      "regenerarConfigure": true
     }
   ]
 }
