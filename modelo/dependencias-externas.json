@@ -89,7 +89,8 @@
       "pastaBibliotecas": ".",
       "cmake": {},
       "fonteDasOpcoes": "compilada com os cabeçalhos do gl4es: o GL/gl.h do gl4es define USE_MGL_NAMESPACE, então as funções saem como mglu* — os mesmos nomes que um jogo compilado com o gl4es procura no link; o config.sub do repositório é antigo e não conhece wasm32-unknown-emscripten (falhou no build real), então o configure é regenerado com o autoreconf do ambiente; o código C++ antigo (libnurbs) usa 'register', proibido no C++17 padrão do clang: compila como C++14; só as funções glu* ganham o prefixo m (glu_mangle.h do gl4es incluído à força): com USE_MGL_NAMESPACE inteiro, as chamadas internas ao OpenGL também viravam mgl* e o link falhava (testado no build real)",
-      "regenerarConfigure": true
+      "regenerarConfigure": true,
+      "situacao": "compila e entrega as funções mglu* (testado no build real do AstroMenace); a GLU chama funções do OpenGL antigo (glTranslated, glMultMatrixd…) e o gl4es estático para wasm não exporta esses nomes, então um jogo que usa gl4es + glu ainda não fecha o link"
     }
   ]
 }

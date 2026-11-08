@@ -53,6 +53,13 @@ export function diagnosticar(log, { max = 6 } = {}) {
             else if (r.tipo === 'simbolo') {
                 // símbolos com prefixo conhecido apontam a biblioteca que falta no link
                 const dep = /^m?glu[A-Z]/.test(m[1]) ? TABELA.find(d => d.id === 'glu') : /^alut[A-Z]/.test(m[1]) ? TABELA.find(d => d.id === 'alut') : null;
+                if (!dep && /^m?gl[A-Z]/.test(m[1])) {
+                    p = { tipo: 'simbolo', simbolo: m[1], dependencia: 'opengl-legado', externa: null,
+                        mensagem: `Função do OpenGL de computador sem definição no link: ${m[1]} (o navegador só tem WebGL: precisa de uma camada que EXPORTE esse nome — o gl4es estático compilado para wasm não exporta os nomes gl* — ou de -sLEGACY_GL_EMULATION; revisão necessária).` };
+                    const chave = 'simbolo|dep:opengl-legado';
+                    if (!vistos.has(chave)) { vistos.add(chave); achados.push(p); }
+                    break;
+                }
                 const ext = dep && dep.externa ? MANIFESTO.find(e => e.id === dep.externa) : null;
                 p = { tipo: 'simbolo', simbolo: m[1], dependencia: dep ? dep.id : null, externa: ext ? ext.id : null,
                     mensagem: `Função/variável sem definição no link: ${m[1]}` + (dep ? ` (é da ${dep.nome}: ` + (ext ? `acrescente "${ext.id}" em ajustes.externas)` : `não está no manifesto — revisão necessária)`) : ' (falta uma biblioteca ou um arquivo no build).') };

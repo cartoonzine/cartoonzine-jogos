@@ -80,3 +80,10 @@ test('símbolo de biblioteca sem port e fora do manifesto = revisão', () => {
     const sem = diagnosticar('wasm-ld: error: a.o: undefined symbol: enet_host_create\n');
     assert.match(sem[0].mensagem, /falta uma biblioteca ou um arquivo no build/);
 });
+
+test('regressão AstroMenace (4º erro, build real com freealut + gl4es + glu): funções do OpenGL antigo sem definição = revisão', () => {
+    const d = diagnosticar(log('astromenace-gl-legado.txt'));
+    assert.equal(d.length, 1);
+    assert.equal(d[0].dependencia, 'opengl-legado');
+    assert.match(d[0].mensagem, /revisão necessária/);
+});
