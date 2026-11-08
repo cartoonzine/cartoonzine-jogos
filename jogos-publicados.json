@@ -162,30 +162,6 @@
    "controles": "teclado",
    "generos": [],
    "url": "https://cartoonzine.github.io/cartoonzine-jogos/bombermaaan/"
-  },
-  {
-   "id": "cuphead",
-   "nome": "Cuphead",
-   "ano": 2025,
-   "licenca": "sem licença",
-   "fonte": "https://github.com/web-ports/cuphead",
-   "original": "https://github.com/web-ports/cuphead",
-   "descricao": "",
-   "controles": "teclado",
-   "generos": [],
-   "url": "https://cartoonzine.github.io/cartoonzine-jogos/cuphead/"
-  },
-  {
-   "id": "gta3web",
-   "nome": "GTA3Web",
-   "ano": 2026,
-   "licenca": "sem licença",
-   "fonte": "https://github.com/woahhcrackers/GTA3Web",
-   "original": "https://github.com/woahhcrackers/GTA3Web",
-   "descricao": "webport of gta 3/gta iii by woahhcrackers",
-   "controles": "teclado",
-   "generos": [],
-   "url": "https://cartoonzine.github.io/cartoonzine-jogos/gta3web/"
   }
  ]
 }
