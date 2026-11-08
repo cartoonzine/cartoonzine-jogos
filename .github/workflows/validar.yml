@@ -9,7 +9,7 @@ run-name: ${{ github.event_name == 'workflow_dispatch' && format('validar {0}', 
 
 on:
   push:
-    branches: [main, prateleira-ports-cmake]   # TEMPORÁRIO (teste do PR)
+    branches: [main]
     paths: ['receitas/**', 'jogos.json']
   workflow_dispatch:
     inputs:
