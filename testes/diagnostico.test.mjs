@@ -64,3 +64,12 @@ test('dependência fora da tabela e do manifesto = revisão; make sem regra; tud
     assert.match(d[0].mensagem, /enet\/enet\.h \(dependência desconhecida: revisão necessária\)/);
     assert.match(diagnosticar(log('starfighter-make.txt'))[0].mensagem, /pr-starfighter\.mo/);
 });
+
+test('regressão AstroMenace (3º erro, build real com freealut + gl4es): GLU sem port e fora do manifesto no link = revisão', () => {
+    const d = diagnosticar(log('astromenace-glu.txt'));
+    assert.equal(d.length, 1);                                   // um aviso por biblioteca, não um por função
+    assert.equal(d[0].tipo, 'simbolo');
+    assert.equal(d[0].dependencia, 'glu');
+    assert.equal(d[0].externa, null);
+    assert.match(d[0].mensagem, /mglu\w+ \(é da GLU: não está no manifesto — revisão necessária\)/);
+});

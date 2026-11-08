@@ -50,7 +50,13 @@ export function diagnosticar(log, { max = 6 } = {}) {
                         : ext ? ` (${ext.nome}: sem port no Emscripten; está no manifesto — acrescente "${ext.id}" em ajustes.externas para compilar ${ext.repo.replace(/^https:\/\/github.com\//, '').replace(/\.git$/, '')}@${ext.commit.slice(0, 7)})`
                         : dep ? ` (${dep.nome}: sem port no Emscripten — ${dep.nota}; revisão necessária)` : ' (dependência desconhecida: revisão necessária)') };
             } else if (r.tipo === 'biblioteca') p = { tipo: 'dependencia-ausente', mensagem: `O link não achou a biblioteca -l${m[1]}: ela não existe no Emscripten (ligue o port certo ou compile na receita).` };
-            else if (r.tipo === 'simbolo') p = { tipo: 'simbolo', mensagem: `Função/variável sem definição no link: ${m[1]} (falta uma biblioteca ou um arquivo no build).` };
+            else if (r.tipo === 'simbolo') {
+                // símbolos com prefixo conhecido apontam a biblioteca que falta no link
+                const dep = /^m?glu[A-Z]/.test(m[1]) ? TABELA.find(d => d.id === 'glu') : /^alut[A-Z]/.test(m[1]) ? TABELA.find(d => d.id === 'alut') : null;
+                const ext = dep && dep.externa ? MANIFESTO.find(e => e.id === dep.externa) : null;
+                p = { tipo: 'simbolo', simbolo: m[1], dependencia: dep ? dep.id : null, externa: ext ? ext.id : null,
+                    mensagem: `Função/variável sem definição no link: ${m[1]}` + (dep ? ` (é da ${dep.nome}: ` + (ext ? `acrescente "${ext.id}" em ajustes.externas)` : `não está no manifesto — revisão necessária)`) : ' (falta uma biblioteca ou um arquivo no build).') };
+            }
             else if (r.tipo === 'cmake') p = { tipo: 'configuracao', mensagem: 'CMake: ' + m[1].trim() };
             else if (r.tipo === 'configure') p = { tipo: 'configuracao', mensagem: 'configure: ' + m[1].trim() };
             else if (r.tipo === 'closure') p = { tipo: 'link', mensagem: `O Closure (otimizador de JS) não conhece "${m[1]}": exporte com -sEXPORTED_RUNTIME_METHODS ou tire o --closure.` };
@@ -59,7 +65,7 @@ export function diagnosticar(log, { max = 6 } = {}) {
             else if (r.tipo === 'make') p = { tipo: 'compilacao', mensagem: `O make precisa de "${m[1]}", que não existe e não sabe gerar (costuma vir de uma ferramenta que falta, como msgfmt/gettext, ou de um passo fora do make).` };
             else if (r.tipo === 'ferramenta') p = { tipo: 'configuracao', mensagem: `Programa "${m[1]}" não encontrado no ambiente de build.` };
             else p = { tipo: 'compilacao', arquivo: m[1], linha: +m[2], mensagem: `Erro de compilação em ${path.basename(m[1])}:${m[2]}: ${m[3].trim()}` };
-            const chave = p.tipo + '|' + (p.cabecalho || p.mensagem);
+            const chave = p.tipo + '|' + (p.cabecalho || (p.dependencia && p.tipo === 'simbolo' ? 'dep:' + p.dependencia : p.mensagem));
             if (!vistos.has(chave)) { vistos.add(chave); achados.push(p); }
             break;
         }
