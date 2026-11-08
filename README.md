@@ -55,6 +55,17 @@ Nada disso publica: **Construir e publicar** só compila fichas sem `rascunho`. 
 só leitura e sem credenciais; só o job `publicar` (que não roda código dos jogos) tem `contents: write`, e ele só
 recebe pastas que passaram por `verificar-saida.mjs`.
 
+**Dependências sem port no Emscripten** só são compiladas se estiverem no manifesto confiável
+`modelo/dependencias-externas.json` (repositório + **commit fixo** + opções + licença + cabeçalhos e bibliotecas
+esperados). `dependencia_externa <id>` baixa o commit, compila, **confere** que os cabeçalhos e as `.a` existem e
+entrega `$EXTERNAS_CFLAGS` (`-I…`), `$EXTERNAS_LIBS` e `"${EXTERNAS_CMAKE[@]}"` para a receita passar explicitamente
+ao configure/link. Id fora do manifesto = `REVISAO`. Header instalado não prova nada: só o link sem símbolo
+indefinido conta (o diagnóstico aponta a biblioteca dos símbolos `glu*`/`alut*`). Hoje: `freealut`, `gl4es`.
+
+`GL4ES_COMMIT`/`GL4ES_DIR` no `construir.yml`/`validar.yml`: **só a receita do Neverball usa** (o script
+`emscripten/install-gl4es.sh` do próprio Neverball lê as duas). Elas não fazem nenhuma outra receita baixar,
+compilar ou linkar o GL4ES; para isso existe `dependencia_externa gl4es` (mesmo commit e opções).
+
 Funções das receitas (`receitas/comum.sh`): `baixar_commit <repo> <sha> [submodulos]`, `publicar_jogo <pasta> <alvo> <título> [dados…]`
 (para com `REVISAO:` em vez de chutar quando há mais de um `.wasm`), `empacotar_dados`, `moldurar`. As receitas
 antigas, feitas à mão, ainda usam `baixar_fonte`/`publicar_saida` e algumas têm `make -k || true` antes de um link
