@@ -5,6 +5,7 @@
 baixar_commit https://github.com/midzer/astromenace.git c9bd3886b4fc9c6eef04d5dcafd33bc541c97111
 FONTE=$(pwd)
 dependencia_externa freealut   # manifesto: modelo/dependencias-externas.json (commit fixo)
+dependencia_externa gl4es   # manifesto: modelo/dependencias-externas.json (commit fixo)
 emcmake cmake -S "." -B build-web -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_FLAGS="-sUSE_FREETYPE=1 -sUSE_SDL=2 -sUSE_SDL_MIXER=2 $EXTERNAS_CFLAGS" -DCMAKE_CXX_FLAGS="-sUSE_FREETYPE=1 -sUSE_SDL=2 -sUSE_SDL_MIXER=2 $EXTERNAS_CFLAGS" \
   -DCMAKE_EXE_LINKER_FLAGS="-sUSE_FREETYPE=1 -sUSE_SDL=2 -lGL -lopenal -sUSE_SDL_MIXER=2 -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web -sFORCE_FILESYSTEM=1 $EXTERNAS_LIBS" "${EXTERNAS_CMAKE[@]}"
