@@ -36,6 +36,20 @@ const REGRAS = [
 export function diagnosticar(log, { max = 6 } = {}) {
     const linhas = String(log || '').split(/\r?\n/).map(l => l.replace(/^\S*Z /, '').replace(/\x1b\[[0-9;]*m/g, ''));
     const achados = [], vistos = new Set();
+    // "CMake Error at …:" + mensagem nas linhas de baixo (o "Could NOT find" só é fatal quando vem logo depois de um CMake Error)
+    for (let i = 0; i < linhas.length; i++) {
+        if (!/^CMake Error\b/.test(linhas[i])) continue;
+        const msg = linhas.slice(i + 1, i + 4).map(x => x.trim()).filter(Boolean).join(' ');
+        const nf = /Could NOT find (\S+?)\b.*\(missing: ([^)]+)\)/.exec(msg);
+        let p;
+        if (nf) {
+            const dep = TABELA.find(d => d.nome.toLowerCase() === nf[1].toLowerCase() || d.id === nf[1].toLowerCase());
+            p = { tipo: 'configuracao', dependencia: dep ? dep.id : null, mensagem: `O CMake do projeto procura ${nf[1]} instalado no sistema (faltam ${nf[2].trim()})` +
+                (dep && dep.port ? `: com o port do Emscripten (${dep.port.join(' ')}) é preciso dizer onde ele fica — preparar_ports_cmake ${dep.id} (modelo/ports-cmake.json) ou ajuste cmakeOpcoes.` : '.') };
+        } else p = { tipo: 'configuracao', mensagem: 'CMake: ' + (msg || linhas[i]).slice(0, 300) };
+        const chave = p.tipo + '|' + p.mensagem;
+        if (!vistos.has(chave)) { vistos.add(chave); achados.push(p); }
+    }
     for (const l of linhas) {
         for (const r of REGRAS) {
             const m = r.re.exec(l);

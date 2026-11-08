@@ -134,3 +134,24 @@ dependencia_externa() {
   echo "   include: $inc · libs:$libs"
   echo "dependência $id $commit ($repo)" >> "$SAIDA/FONTE.txt"
 }
+
+# ---------------------------------------------------------------- ports para CMake que procura "biblioteca do sistema"
+# preparar_ports_cmake <id>...: compila o port (embuilder), confere os caminhos de modelo/ports-cmake.json e
+# põe em PORTS_CMAKE (array de -DVAR=caminho). Id sem entrada no arquivo é ignorado (o port continua pelas flags -s).
+PORTS_CMAKE=()
+preparar_ports_cmake() {
+  local man="$RAIZ/modelo/ports-cmake.json" cache id e k v
+  cache=$(em-config CACHE)
+  for id in "$@"; do
+    e=$(jq -c --arg i "$id" '.ports[] | select(.id == $i)' "$man")
+    [ -n "$e" ] || continue
+    mapfile -t alvos < <(jq -r '.embuilder[]' <<<"$e")
+    embuilder build "${alvos[@]}"
+    while IFS=$'\t' read -r k v; do
+      v="${v//\{cache\}/$cache}"
+      [ -e "$v" ] || { echo "REVISAO: port $id compilado, mas não achei $v"; exit 1; }
+      PORTS_CMAKE+=("-D$k=$v")
+    done < <(jq -r '.cmake | to_entries[] | [.key, .value] | @tsv' <<<"$e")
+  done
+  echo "ports para o CMake: ${PORTS_CMAKE[*]:-(nenhum)}"
+}

@@ -1,0 +1,7 @@
+{
+  "_comentario": "Para projetos CMake que procuram a biblioteca 'instalada no sistema' (FindSDL2.cmake próprio etc.): onde o port do Emscripten fica depois de compilado. preparar_ports_cmake (receitas/comum.sh) compila o port com o embuilder, confere que os caminhos existem e passa como -DVAR=caminho. {cache} = em-config CACHE. Só entra o que está aqui.",
+  "ports": [
+    { "id": "sdl2", "embuilder": ["sdl2"],
+      "cmake": { "SDL2_INCLUDE_DIR": "{cache}/sysroot/include/SDL2", "SDL2_LIBRARY": "{cache}/sysroot/lib/wasm32-emscripten/libSDL2.a" } }
+  ]
+}

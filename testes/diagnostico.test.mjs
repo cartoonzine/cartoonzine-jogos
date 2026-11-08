@@ -87,3 +87,12 @@ test('regressão AstroMenace (4º erro, build real com freealut + gl4es + glu): 
     assert.equal(d[0].dependencia, 'opengl-legado');
     assert.match(d[0].mensagem, /revisão necessária/);
 });
+
+test('regressão AstroMenace original: CMake Error "Could NOT find SDL2" é reconhecido e aponta o port', () => {
+    const d = diagnosticar(log('astromenace-original-sdl2.txt'));
+    assert.equal(d[0].tipo, 'configuracao');
+    assert.equal(d[0].dependencia, 'sdl2');
+    assert.match(d[0].mensagem, /procura SDL2 instalado no sistema \(faltam SDL2_LIBRARY SDL2_INCLUDE_DIR\).*preparar_ports_cmake sdl2/);
+    // "Could NOT find" sozinho (sem CMake Error) continua sendo só aviso
+    assert.deepEqual(diagnosticar('-- Could NOT find Freetype (missing: FREETYPE_LIBRARY)\n'), []);
+});

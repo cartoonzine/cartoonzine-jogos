@@ -81,3 +81,17 @@ test('externa que requer outra: sem a outra antes = REVISAO, sem compilar nada',
     assert.throws(() => roda(a, 'dependencia_externa glu'), e => /REVISAO: glu precisa de 'gl4es' antes/.test(e.stdout.toString()));
     assert.ok(!fs.existsSync(path.join(a.t, 'deps')));
 });
+
+test('preparar_ports_cmake: compila o port, confere o caminho e passa -DVAR; caminho que não existe = REVISAO', () => {
+    const a = ambiente();
+    fs.copyFileSync(path.join(RAIZ, 'modelo/ports-cmake.json'), path.join(a.raiz, 'modelo/ports-cmake.json'));
+    const cache = path.join(a.t, 'cache');
+    fs.writeFileSync(path.join(a.bin, 'em-config'), `#!/bin/bash\necho ${cache}\n`, { mode: 0o755 });
+    fs.writeFileSync(path.join(a.bin, 'embuilder'), `#!/bin/bash\nmkdir -p ${cache}/sysroot/include/SDL2 ${cache}/sysroot/lib/wasm32-emscripten && touch ${cache}/sysroot/lib/wasm32-emscripten/libSDL2.a\n`, { mode: 0o755 });
+    const out = roda(a, 'preparar_ports_cmake sdl2 naoexiste; printf "P=%s\\n" "${PORTS_CMAKE[@]}"');
+    assert.match(out, new RegExp('P=-DSDL2_INCLUDE_DIR=' + cache + '/sysroot/include/SDL2\\n'));
+    assert.match(out, new RegExp('P=-DSDL2_LIBRARY=' + cache + '/sysroot/lib/wasm32-emscripten/libSDL2\\.a\\n'));
+    fs.writeFileSync(path.join(a.bin, 'embuilder'), '#!/bin/bash\nexit 0\n', { mode: 0o755 });
+    fs.rmSync(cache, { recursive: true, force: true });
+    assert.throws(() => roda(a, 'preparar_ports_cmake sdl2'), e => /REVISAO: port sdl2 compilado, mas não achei/.test(e.stdout.toString()));
+});
