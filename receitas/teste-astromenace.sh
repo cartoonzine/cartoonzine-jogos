@@ -15,3 +15,4 @@ PASTA_BUILD=build-web
 publicar_jogo "$PASTA_BUILD" "astromenace" "Teste astromenace" "gamedata@/gamedata"
 for l in COPYING COPYING.txt LICENSE LICENSE.txt LICENSE.md LICENCE; do if [ -f "$FONTE/$l" ]; then cp "$FONTE/$l" "$SAIDA/LICENCA.txt"; break; fi; done
 
+
