@@ -74,8 +74,8 @@
         "--enable-static"
       ],
       "ambiente": {
-        "CFLAGS": "-O2 -DUSE_MGL_NAMESPACE -I{include:gl4es}",
-        "CXXFLAGS": "-O2 -std=c++14 -DUSE_MGL_NAMESPACE -I{include:gl4es}",
+        "CFLAGS": "-O2 -DUSE_MGL_NAMESPACE -I{include:gl4es} -I{include:gl4es}/GL",
+        "CXXFLAGS": "-O2 -std=c++14 -DUSE_MGL_NAMESPACE -I{include:gl4es} -I{include:gl4es}/GL",
         "GL_CFLAGS": "-I{include:gl4es}",
         "GL_LIBS": "-lGL"
       },
@@ -88,7 +88,7 @@
       ],
       "pastaBibliotecas": ".",
       "cmake": {},
-      "fonteDasOpcoes": "compilada com os cabeçalhos do gl4es: o GL/gl.h do gl4es define USE_MGL_NAMESPACE, então as funções saem como mglu* — os mesmos nomes que um jogo compilado com o gl4es procura no link; o config.sub do repositório é antigo e não conhece wasm32-unknown-emscripten (falhou no build real), então o configure é regenerado com o autoreconf do ambiente; o código C++ antigo (libnurbs) usa 'register', proibido no C++17 padrão do clang: compila como C++14; -DUSE_MGL_NAMESPACE explícito: sem ele a biblioteca saiu com nomes glu* e o link do jogo (que pede mglu*) falhou no build real",
+      "fonteDasOpcoes": "compilada com os cabeçalhos do gl4es: o GL/gl.h do gl4es define USE_MGL_NAMESPACE, então as funções saem como mglu* — os mesmos nomes que um jogo compilado com o gl4es procura no link; o config.sub do repositório é antigo e não conhece wasm32-unknown-emscripten (falhou no build real), então o configure é regenerado com o autoreconf do ambiente; o código C++ antigo (libnurbs) usa 'register', proibido no C++17 padrão do clang: compila como C++14; -DUSE_MGL_NAMESPACE explícito: sem ele a biblioteca saiu com nomes glu* e o link do jogo (que pede mglu*) falhou no build real; o gl.h que vem dentro da GLU inclui \"gl_mangle.h\", que só existe no gl4es (include/GL): por isso o -I…/GL",
       "regenerarConfigure": true
     }
   ]
