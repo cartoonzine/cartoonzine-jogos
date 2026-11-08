@@ -99,8 +99,10 @@ dependencia_externa() {
   local inc h lib libs=""
   inc="$dir/src/$(jq -r .include <<<"$e")"
   while read -r h; do [ -f "$inc/$h" ] || { echo "REVISAO: $id compilou mas não tem o cabeçalho $h em $inc"; exit 1; }; done < <(jq -r '.cabecalhos[]' <<<"$e")
+  local libdir="$dir/build" pl; pl=$(jq -r '.pastaBibliotecas // empty' <<<"$e")
+  if [ -n "$pl" ]; then [[ "$pl" =~ ^[A-Za-z0-9_./-]+$ && "$pl" != *..* ]] || { echo "REVISAO: pastaBibliotecas inválida em $id"; exit 1; }; libdir="$dir/src/$pl"; fi
   while read -r lib; do
-    local achou=""; [ -d "$dir/build" ] && achou=$(find "$dir/build" -name "$lib" -type f | head -1)
+    local achou=""; [ -d "$libdir" ] && achou=$(find "$libdir" -name "$lib" -type f | head -1)
     [ -n "$achou" ] && [ -s "$achou" ] || { echo "REVISAO: $id compilou mas não gerou $lib"; exit 1; }
     libs="$libs $achou"
   done < <(jq -r '.bibliotecas[]' <<<"$e")
@@ -109,7 +111,7 @@ dependencia_externa() {
   local k v
   while IFS=$'\t' read -r k v; do
     v="${v//\{include\}/$inc}"
-    if [[ "$v" =~ \{lib:([^}]+)\} ]]; then v="${v//\{lib:${BASH_REMATCH[1]}\}/$(find "$dir/build" -name "${BASH_REMATCH[1]}" -type f | head -1)}"; fi
+    if [[ "$v" =~ \{lib:([^}]+)\} ]]; then v="${v//\{lib:${BASH_REMATCH[1]}\}/$(find "$libdir" -name "${BASH_REMATCH[1]}" -type f | head -1)}"; fi
     EXTERNAS_CMAKE+=("-D$k=$v")
   done < <(jq -r '.cmake | to_entries[] | [.key, .value] | @tsv' <<<"$e")
   echo "   include: $inc · libs:$libs"
