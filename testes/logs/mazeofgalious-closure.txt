@@ -1,0 +1,2 @@
+wasm-ld: error: unable to find library -lSDL2_image
+building:ERROR: /tmp/emscripten_temp/index.jso4.js:194:171: ERROR - [JSC_UNDEFINED_VARIABLE] variable allocate is undeclared

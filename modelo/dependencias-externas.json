@@ -1,0 +1,60 @@
+{
+  "_comentario": "MANIFESTO CONFIÁVEL de dependências que não existem no Emscripten e são compiladas para WebAssembly na própria receita. Só o que está aqui pode ser baixado/compilado automaticamente (repositório + commit fixo + opções + licença). Mudança neste arquivo = revisão humana no PR. Usado por receitas/comum.sh (dependencia_externa), modelo/diagnostico.mjs e pela Prateleira da Studio. 'pastaBibliotecas' (opcional) = onde o projeto grava as .a, relativo ao código-fonte; sem ela, procura na pasta de build.",
+  "externas": [
+    {
+      "id": "freealut",
+      "nome": "FreeALUT",
+      "fornece": [
+        "alut"
+      ],
+      "repo": "https://github.com/vancegroup/freealut.git",
+      "commit": "8abb4207630fdcb0184d20f3188aac58f581a22c",
+      "licenca": "LGPL-2.0",
+      "build": "cmake",
+      "opcoes": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_EXAMPLES=OFF",
+        "-DBUILD_TESTS=OFF"
+      ],
+      "include": "include",
+      "cabecalhos": [
+        "AL/alut.h"
+      ],
+      "bibliotecas": [
+        "libalut.a"
+      ],
+      "cmake": {
+        "ALUT_INCLUDE_DIR": "{include}",
+        "ALUT_LIBRARY": "{lib:libalut.a}"
+      },
+      "fonteDasOpcoes": "opções públicas do CMakeLists.txt do freealut"
+    },
+    {
+      "id": "gl4es",
+      "nome": "GL4ES (OpenGL 1.x/2.x sobre GLES2/WebGL)",
+      "fornece": [
+        "gl4es"
+      ],
+      "repo": "https://github.com/ptitSeb/gl4es.git",
+      "commit": "c9895df34cd466c23bc60c2bd3db3d87e98fcbe7",
+      "licenca": "MIT",
+      "build": "cmake",
+      "opcoes": [
+        "-DNOX11=ON",
+        "-DNOEGL=ON",
+        "-DSTATICLIB=ON"
+      ],
+      "include": "include",
+      "cabecalhos": [
+        "gl4esinit.h",
+        "gl4eshint.h"
+      ],
+      "bibliotecas": [
+        "libGL.a"
+      ],
+      "cmake": {},
+      "fonteDasOpcoes": "mesmas opções e commit do build web oficial do Neverball (emscripten/install-gl4es.sh, que usa GL4ES_COMMIT/GL4ES_DIR do construir.yml); o CMakeLists do gl4es grava as bibliotecas em <fonte>/lib (CMAKE_ARCHIVE_OUTPUT_DIRECTORY)",
+      "pastaBibliotecas": "lib"
+    }
+  ]
+}

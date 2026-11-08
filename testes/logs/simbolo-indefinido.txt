@@ -1,0 +1,4 @@
+[100%] Linking CXX executable astromenace.html
+wasm-ld: error: CMakeFiles/astromenace.dir/src/main.cpp.o: undefined symbol: gluPerspective
+wasm-ld: error: CMakeFiles/astromenace.dir/src/game.cpp.o: undefined symbol: alutInitWithoutContext
+em++: error: '/emsdk/upstream/bin/wasm-ld @/tmp/emscripten_xxx.rsp.utf-8' failed (returned 1)

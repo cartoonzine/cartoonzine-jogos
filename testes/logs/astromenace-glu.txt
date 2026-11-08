@@ -1,0 +1,5 @@
+[100%] Linking C static library libalut.a
+[100%] Linking C static library /tmp/obra/deps/gl4es/src/lib/libGL.a
+[100%] Linking CXX executable astromenace.js
+wasm-ld: error: lto.tmp: undefined symbol: mgluPerspective
+wasm-ld: error: lto.tmp: undefined symbol: mgluPerspective

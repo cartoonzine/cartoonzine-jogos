@@ -31,6 +31,6 @@
   ['pointerdown', 'keydown'].forEach(function (e) { window.addEventListener(e, function () { if (document.activeElement !== Module.canvas) Module.canvas.focus(); }, true); });
   window.addEventListener('load', function () { Module.canvas.focus(); });
 </script>
-<script async src="{{JS}}"></script>
+{{ANTES}}<script async src="{{JS}}"></script>
 </body>
 </html>

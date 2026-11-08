@@ -26,6 +26,54 @@ Cada pasta publicada tem `LICENCA.txt`, `CREDITOS.txt` e `FONTE.txt` (o commit e
 
 Rodar só um jogo: *Actions → Construir e publicar os jogos → Run workflow* e escreva o id.
 
+## 🧩 Prateleira (Studio) → validação → publicação
+
+A tela **🧩 Prateleira** do Cartoonzine Studio analisa o link do GitHub de um jogo **só com regras** (sem IA) e grava
+uma **receita candidata** (`receitas/<id>.sh`) + a ficha com `"rascunho": true`, o `"commit"` exato analisado e os
+`"ajustes"` estruturados (subpasta, alvo, pastas de dados, opções do CMake/configure, flags conferidas por lista branca).
+
+| Estado (na Studio) | O que quer dizer |
+|---|---|
+| 🔎 revisão necessária | as regras acharam algo sem solução conhecida (ex.: ALUT/GLU sem port, build desconhecido, sem licença) |
+| 📝 candidata | receita gerada, ainda não validada (ou mudou depois da última validação) |
+| ⚙️ validando | o workflow **Validar receita** está rodando |
+| ❌ falhou | configuração, compilação, link, artefatos ou teste no navegador falharam (resumo + link do log) |
+| ✅ pronta | validada; ainda é rascunho até alguém clicar **Publicar** e reconfirmar a licença dos dados |
+
+**Validar receita** (`.github/workflows/validar.yml`) roda quando `receitas/**` ou `jogos.json` mudam (só os jogos que
+mudaram) ou na mão (*Run workflow* com o id — é o botão "Validar de novo" da Studio, que precisa de token com
+**Actions: Read and write**):
+1. `compilar (<id>)` — contêiner `emscripten/emsdk:<versão fixa>` (campo `"emsdk"` da ficha, padrão `3.1.74`),
+   checkout **sem credenciais**, permissão só de leitura, nenhum secret. Erro em qualquer etapa = job falha;
+   `modelo/diagnostico.mjs` transforma o log em anotações (ex.: *Falta AL/alut.h — ALUT, sem port no Emscripten*).
+2. `modelo/verificar-saida.mjs` — index.html → .js → .wasm (precisa ser WebAssembly de verdade) → .data, pastas de dados
+   declaradas dentro do pacote, `FONTE.txt` com o commit.
+3. `navegador (<id>)` — `modelo/testar-navegador.mjs` abre o jogo num Chromium sem tela (Playwright 1.48.2) e exige que
+   o `main()` comece sem erro de página, sem `Aborted(` e sem 404. **Não joga o jogo**: travar depois de abrir passa.
+
+Nada disso publica: **Construir e publicar** só compila fichas sem `rascunho`. Nele os jobs de compilação também são
+só leitura e sem credenciais; só o job `publicar` (que não roda código dos jogos) tem `contents: write`, e ele só
+recebe pastas que passaram por `verificar-saida.mjs`.
+
+**Dependências sem port no Emscripten** só são compiladas se estiverem no manifesto confiável
+`modelo/dependencias-externas.json` (repositório + **commit fixo** + opções + licença + cabeçalhos e bibliotecas
+esperados). `dependencia_externa <id>` baixa o commit, compila, **confere** que os cabeçalhos e as `.a` existem e
+entrega `$EXTERNAS_CFLAGS` (`-I…`), `$EXTERNAS_LIBS` e `"${EXTERNAS_CMAKE[@]}"` para a receita passar explicitamente
+ao configure/link. Id fora do manifesto = `REVISAO`. Header instalado não prova nada: só o link sem símbolo
+indefinido conta (o diagnóstico aponta a biblioteca dos símbolos `glu*`/`alut*`). Hoje: `freealut`, `gl4es`.
+
+`GL4ES_COMMIT`/`GL4ES_DIR` no `construir.yml`/`validar.yml`: **só a receita do Neverball usa** (o script
+`emscripten/install-gl4es.sh` do próprio Neverball lê as duas). Elas não fazem nenhuma outra receita baixar,
+compilar ou linkar o GL4ES; para isso existe `dependencia_externa gl4es` (mesmo commit e opções).
+
+Funções das receitas (`receitas/comum.sh`): `baixar_commit <repo> <sha> [submodulos]`, `publicar_jogo <pasta> <alvo> <título> [dados…]`
+(para com `REVISAO:` em vez de chutar quando há mais de um `.wasm`), `empacotar_dados`, `moldurar`. As receitas
+antigas, feitas à mão, ainda usam `baixar_fonte`/`publicar_saida` e algumas têm `make -k || true` antes de um link
+manual — funcionam (o link falha se faltar algo), mas não seguem o padrão novo.
+
+Testes: `node --test testes/*.test.mjs` (diagnóstico com logs reais — inclusive o do AstroMenace —, conferência de
+artefatos, `set -euo pipefail` sem `|| true` escondendo erro, `publicar_jogo`/`baixar_commit`).
+
 ## 💾 Cartucho DOS (`paginas/dos/`)
 
 Abre jogos de **MS-DOS** direto, em tela cheia, sem logo nem botões de emulador (como os jogos web):

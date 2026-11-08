@@ -1,0 +1,129 @@
+# Valida a receita de um jogo ANTES de publicar (usado pela Prateleira da Studio).
+#  - roda quando uma receita (receitas/<id>.sh) ou a ficha do jogo no jogos.json muda, ou na mão ("Validar de novo")
+#  - compila num job isolado: só leitura do repositório, sem secrets, sem token salvo no checkout
+#  - qualquer erro de configuração/compilação/link falha o job; o diagnóstico vira anotação (a Studio mostra)
+#  - confere os artefatos (wasm válido, .js/.data presentes, pastas de dados) e abre o jogo num Chromium sem tela
+#  - NÃO publica nada e NÃO tira o "rascunho": isso é decisão humana na Studio
+name: Validar receita
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('validar {0}', inputs.id) || github.event.head_commit.message }}
+
+on:
+  push:
+    branches: [main]
+    paths: ['receitas/**', 'jogos.json']
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'id do jogo (igual ao jogos.json)'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validar-${{ github.event_name == 'workflow_dispatch' && inputs.id || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  quais:
+    runs-on: ubuntu-latest
+    outputs:
+      jogos: ${{ steps.q.outputs.jogos }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - id: q
+        env:
+          ID: ${{ inputs.id }}
+          ANTES: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            [[ "$ID" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "::error::id inválido"; exit 1; }
+            ids="$ID"
+          else
+            base="$ANTES"; git cat-file -e "$base^{commit}" 2>/dev/null || base="HEAD~1"
+            ids=$(git diff --name-only "$base" HEAD -- 'receitas/*.sh' | sed -n 's#^receitas/\([a-z0-9-]*\)\.sh$#\1#p' | grep -vx comum || true)
+            # fichas que mudaram no jogos.json (ex.: commit ou ajustes novos)
+            if git show "$base:jogos.json" > /tmp/antes.json 2>/dev/null; then
+              ids="$ids $(jq -r --slurpfile a /tmp/antes.json '.jogos[] as $j | select(($a[0].jogos | map(select(.id == $j.id)) | .[0]) != $j) | $j.id' jogos.json)"
+            fi
+          fi
+          # só os que existem no jogos.json e têm receita
+          lista=$(for i in $ids; do jq -e --arg i "$i" '.jogos[] | select(.id == $i)' jogos.json >/dev/null && [ -f "receitas/$i.sh" ] && echo "$i"; done | sort -u)
+          json=$(for i in $lista; do jq -c --arg i "$i" '.jogos[] | select(.id == $i) | {id, emsdk: (.emsdk // "3.1.74"), dados: ((.ajustes.dados // []) | map(split("@")[1] // .) | join(","))}' jogos.json; done | jq -sc .)
+          echo "jogos=$json" >> "$GITHUB_OUTPUT"
+          echo "Para validar: $json"
+
+  compilar:
+    needs: quais
+    if: ${{ needs.quais.outputs.jogos != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.quais.outputs.jogos) }}
+    name: compilar (${{ matrix.id }})
+    container:
+      image: emscripten/emsdk:${{ matrix.emsdk }}
+      env:
+        # iguais ao construir.yml: só a receita do Neverball usa (o emscripten/install-gl4es.sh do próprio Neverball lê
+        # GL4ES_COMMIT/GL4ES_DIR). Não fazem nada sozinhas: outras receitas usam o GL4ES pelo manifesto (dependencia_externa gl4es).
+        GL4ES_COMMIT: "c9895df34cd466c23bc60c2bd3db3d87e98fcbe7"
+        GL4ES_DIR: "/opt/gl4es"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Ferramentas
+        run: |
+          (command -v sudo >/dev/null || (apt-get update -q && apt-get install -y -q sudo))
+          sudo apt-get update -q && sudo apt-get install -y -q autoconf automake libtool unzip gcc make pkg-config git jq
+      - name: Compilar com a receita
+        shell: bash
+        run: |
+          set -o pipefail
+          export RAIZ="$GITHUB_WORKSPACE" SAIDA="$GITHUB_WORKSPACE/saida/${{ matrix.id }}"
+          mkdir -p "$SAIDA" /tmp/obra && cd /tmp/obra
+          echo "emsdk ${{ matrix.emsdk }} · $(emcc --version | head -1)"
+          if ! bash -c ". '$RAIZ/receitas/${{ matrix.id }}.sh'" 2>&1 | tee "$RUNNER_TEMP/log.txt"; then
+            node "$RAIZ/modelo/diagnostico.mjs" "$RUNNER_TEMP/log.txt" --github || true   # só o resumo; o job falha na linha de baixo
+            exit 1
+          fi
+      - name: Conferir os artefatos
+        run: node modelo/verificar-saida.mjs "saida/${{ matrix.id }}" --dados "${{ matrix.dados }}" --github
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validar-${{ matrix.id }}
+          path: saida/${{ matrix.id }}
+          retention-days: 3
+
+  navegador:
+    needs: [quais, compilar]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.quais.outputs.jogos) }}
+    name: navegador (${{ matrix.id }})
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: validar-${{ matrix.id }}
+          path: jogo
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar o Chromium do teste
+        run: npm i --no-save --no-audit --no-fund playwright@1.48.2 && npx playwright install --with-deps chromium
+      - name: Abrir o jogo no navegador
+        run: node modelo/testar-navegador.mjs jogo --github

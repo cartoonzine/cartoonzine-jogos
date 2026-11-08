@@ -1,0 +1,5 @@
+[ 40%] Building CXX object CMakeFiles/astromenace.dir/src/core/graphics/gl_main.cpp.o
+/tmp/obra/fonte/src/core/graphics/gl_main.cpp:31:10: fatal error: 'gl4esinit.h' file not found
+   31 | #include <gl4esinit.h>
+1 error generated.
+gmake[2]: *** [CMakeFiles/astromenace.dir/build.make:300: CMakeFiles/astromenace.dir/src/core/graphics/gl_main.cpp.o] Error 1
