@@ -78,7 +78,7 @@ publicar_jogo() {
 # confere que os cabeçalhos e as bibliotecas declarados existem e acrescenta em:
 #   EXTERNAS_CFLAGS (-I…)   EXTERNAS_LIBS (caminhos .a)   EXTERNAS_CMAKE (array de -DVAR=valor)
 # Id fora do manifesto = para com REVISAO (não baixa nem roda nada que não esteja declarado).
-EXTERNAS_CFLAGS="${EXTERNAS_CFLAGS:-}"; EXTERNAS_LIBS="${EXTERNAS_LIBS:-}"; EXTERNAS_CMAKE=()
+EXTERNAS_CFLAGS="${EXTERNAS_CFLAGS:-}"; EXTERNAS_LIBS="${EXTERNAS_LIBS:-}"; EXTERNAS_CMAKE=(); declare -A EXTERNAS_INC=()
 dependencia_externa() {
   local id="$1" man="$RAIZ/modelo/dependencias-externas.json" e
   e=$(jq -c --arg i "$id" '.externas[] | select(.id == $i)' "$man")
@@ -86,16 +86,34 @@ dependencia_externa() {
   local repo commit build dir
   repo=$(jq -r .repo <<<"$e"); commit=$(jq -r .commit <<<"$e"); build=$(jq -r .build <<<"$e")
   [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "REVISAO: commit inválido no manifesto para $id"; exit 1; }
-  [ "$build" = cmake ] || { echo "REVISAO: build '$build' de $id sem suporte"; exit 1; }
+  [ "$build" = cmake ] || [ "$build" = autotools ] || { echo "REVISAO: build '$build' de $id sem suporte"; exit 1; }
+  local r
+  while read -r r; do
+    [ -n "${EXTERNAS_INC[$r]:-}" ] || { echo "REVISAO: $id precisa de '$r' antes (ponha dependencia_externa $r primeiro)"; exit 1; }
+  done < <(jq -r '(.requer // [])[]' <<<"$e")
   dir="${DEPS:-/tmp/obra/deps}/$id"
   rm -rf "$dir" && mkdir -p "$dir" && (
     cd "$dir" && git init -q src && cd src && git remote add origin "$repo" &&
     git fetch -q --depth 1 origin "$commit" && git checkout -q FETCH_HEAD && [ "$(git rev-parse HEAD)" = "$commit" ]
   ) || { echo "REVISAO: não consegui baixar $id @ $commit"; exit 1; }
   mapfile -t ops < <(jq -r '.opcoes[]' <<<"$e")
-  echo "== $id @ ${commit:0:12} ($(jq -r .licenca <<<"$e")) → cmake ${ops[*]}"
-  emcmake cmake -S "$dir/src" -B "$dir/build" -DCMAKE_BUILD_TYPE=Release "${ops[@]}"
-  cmake --build "$dir/build" -j"$(nproc)"
+  # variáveis de ambiente do build (só as declaradas; {include:<id>} = include de uma externa já compilada)
+  local amb=() k v
+  while IFS=$'\t' read -r k v; do
+    [[ "$k" =~ ^[A-Z_][A-Z0-9_]*$ ]] || { echo "REVISAO: variável inválida no manifesto ($id): $k"; exit 1; }
+    while [[ "$v" =~ \{include:([a-z0-9-]+)\} ]]; do v="${v//\{include:${BASH_REMATCH[1]}\}/${EXTERNAS_INC[${BASH_REMATCH[1]}]:-}}"; done
+    amb+=("$k=$v")
+  done < <(jq -r '(.ambiente // {}) | to_entries[] | [.key, .value] | @tsv' <<<"$e")
+  echo "== $id @ ${commit:0:12} ($(jq -r .licenca <<<"$e")) → $build ${ops[*]} ${amb[*]}"
+  if [ "$build" = cmake ]; then
+    env "${amb[@]}" emcmake cmake -S "$dir/src" -B "$dir/build" -DCMAKE_BUILD_TYPE=Release "${ops[@]}"
+    env "${amb[@]}" cmake --build "$dir/build" -j"$(nproc)"
+  else
+    local regen; regen=$(jq -r '.regenerarConfigure // false' <<<"$e")
+    ( cd "$dir/src" && { [ -x configure ] && [ "$regen" != true ] || autoreconf -fi; } &&
+      env "${amb[@]}" emconfigure ./configure --host=wasm32-unknown-emscripten "${ops[@]}" &&
+      env "${amb[@]}" emmake make -j"$(nproc)" )
+  fi
   local inc h lib libs=""
   inc="$dir/src/$(jq -r .include <<<"$e")"
   while read -r h; do [ -f "$inc/$h" ] || { echo "REVISAO: $id compilou mas não tem o cabeçalho $h em $inc"; exit 1; }; done < <(jq -r '.cabecalhos[]' <<<"$e")
@@ -106,9 +124,8 @@ dependencia_externa() {
     [ -n "$achou" ] && [ -s "$achou" ] || { echo "REVISAO: $id compilou mas não gerou $lib"; exit 1; }
     libs="$libs $achou"
   done < <(jq -r '.bibliotecas[]' <<<"$e")
-  EXTERNAS_CFLAGS="$EXTERNAS_CFLAGS -I$inc"
+  EXTERNAS_CFLAGS="$EXTERNAS_CFLAGS -I$inc"; EXTERNAS_INC[$id]="$inc"
   EXTERNAS_LIBS="$EXTERNAS_LIBS$libs"
-  local k v
   while IFS=$'\t' read -r k v; do
     v="${v//\{include\}/$inc}"
     if [[ "$v" =~ \{lib:([^}]+)\} ]]; then v="${v//\{lib:${BASH_REMATCH[1]}\}/$(find "$libdir" -name "${BASH_REMATCH[1]}" -type f | head -1)}"; fi

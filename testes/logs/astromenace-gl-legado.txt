@@ -1,0 +1,5 @@
+wasm-ld: error: /tmp/obra/deps/glu/src/./.libs/libGLU.a(mipmap.o): undefined symbol: glGetTexLevelParameteriv
+wasm-ld: error: /tmp/obra/deps/glu/src/./.libs/libGLU.a(mipmap.o): undefined symbol: glTexImage1D
+wasm-ld: error: /tmp/obra/deps/glu/src/./.libs/libGLU.a(project.o): undefined symbol: glMultMatrixd
+wasm-ld: error: /tmp/obra/deps/glu/src/./.libs/libGLU.a(project.o): undefined symbol: glMultMatrixf
+wasm-ld: error: /tmp/obra/deps/glu/src/./.libs/libGLU.a(project.o): undefined symbol: glTranslated

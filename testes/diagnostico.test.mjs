@@ -65,11 +65,25 @@ test('dependência fora da tabela e do manifesto = revisão; make sem regra; tud
     assert.match(diagnosticar(log('starfighter-make.txt'))[0].mensagem, /pr-starfighter\.mo/);
 });
 
-test('regressão AstroMenace (3º erro, build real com freealut + gl4es): GLU sem port e fora do manifesto no link = revisão', () => {
+test('regressão AstroMenace (3º erro, build real com freealut + gl4es): símbolos mglu* no link apontam a GLU do manifesto', () => {
     const d = diagnosticar(log('astromenace-glu.txt'));
     assert.equal(d.length, 1);                                   // um aviso por biblioteca, não um por função
     assert.equal(d[0].tipo, 'simbolo');
     assert.equal(d[0].dependencia, 'glu');
-    assert.equal(d[0].externa, null);
-    assert.match(d[0].mensagem, /mglu\w+ \(é da GLU: não está no manifesto — revisão necessária\)/);
+    assert.equal(d[0].externa, 'glu');
+    assert.match(d[0].mensagem, /mglu\w+ \(é da GLU: acrescente "glu" em ajustes\.externas\)/);
+});
+
+test('símbolo de biblioteca sem port e fora do manifesto = revisão', () => {
+    const d = diagnosticar('wasm-ld: error: a.o: undefined symbol: alutInit\n', {});
+    assert.equal(d[0].dependencia, 'alut');
+    const sem = diagnosticar('wasm-ld: error: a.o: undefined symbol: enet_host_create\n');
+    assert.match(sem[0].mensagem, /falta uma biblioteca ou um arquivo no build/);
+});
+
+test('regressão AstroMenace (4º erro, build real com freealut + gl4es + glu): funções do OpenGL antigo sem definição = revisão', () => {
+    const d = diagnosticar(log('astromenace-gl-legado.txt'));
+    assert.equal(d.length, 1);
+    assert.equal(d[0].dependencia, 'opengl-legado');
+    assert.match(d[0].mensagem, /revisão necessária/);
 });
