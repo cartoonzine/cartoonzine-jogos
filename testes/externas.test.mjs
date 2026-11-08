@@ -14,10 +14,12 @@ test('manifesto: cada dependência tem repo, commit fixo de 40 letras, licença,
         assert.match(e.id, /^[a-z0-9-]+$/);
         assert.match(e.repo, /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\.git$/);
         assert.match(e.commit, /^[0-9a-f]{40}$/, e.id);
-        assert.ok(e.licenca && e.build === 'cmake' && e.cabecalhos.length && e.bibliotecas.length, e.id);
-        for (const o of e.opcoes) assert.match(o, /^-D[A-Z0-9_]+=[A-Za-z0-9_.-]+$/);
+        assert.ok(e.licenca && ['cmake', 'autotools'].includes(e.build) && e.cabecalhos.length && e.bibliotecas.length, e.id);
+        for (const o of e.opcoes) assert.match(o, e.build === 'cmake' ? /^-D[A-Z0-9_]+=[A-Za-z0-9_.-]+$/ : /^--[a-z0-9-]+(=[A-Za-z0-9_.-]+)?$/);
+        for (const [k, v] of Object.entries(e.ambiente || {})) { assert.match(k, /^[A-Z_][A-Z0-9_]*$/); assert.ok(!/[`$;|&<>]/.test(v), v); }
+        for (const r of e.requer || []) assert.ok(MAN.findIndex(x => x.id === r) >= 0 && MAN.findIndex(x => x.id === r) < MAN.indexOf(e), `${e.id} requer ${r}`);
     }
-    assert.deepEqual(MAN.map(e => e.id).sort(), ['freealut', 'gl4es']);
+    assert.deepEqual(MAN.map(e => e.id).sort(), ['freealut', 'gl4es', 'glu']);
 });
 
 function ambiente() {
@@ -69,4 +71,13 @@ test('compilou mas não gerou a biblioteca declarada = REVISAO (header sozinho n
     const a = ambiente();
     fs.writeFileSync(path.join(a.bin, 'cmake'), '#!/bin/bash\nexit 0\n', { mode: 0o755 });
     assert.throws(() => roda(a, 'dependencia_externa freealut'), e => /REVISAO: freealut compilou mas não gerou libalut\.a/.test(e.stdout.toString()));
+});
+
+test('externa que requer outra: sem a outra antes = REVISAO, sem compilar nada', () => {
+    const a = ambiente();
+    const man = JSON.parse(fs.readFileSync(path.join(a.raiz, 'modelo/dependencias-externas.json'), 'utf8'));
+    man.externas.push({ ...man.externas[0], id: 'glu', requer: ['gl4es'], build: 'autotools', opcoes: ['--disable-shared'] });
+    fs.writeFileSync(path.join(a.raiz, 'modelo/dependencias-externas.json'), JSON.stringify(man));
+    assert.throws(() => roda(a, 'dependencia_externa glu'), e => /REVISAO: glu precisa de 'gl4es' antes/.test(e.stdout.toString()));
+    assert.ok(!fs.existsSync(path.join(a.t, 'deps')));
 });

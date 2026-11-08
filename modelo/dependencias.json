@@ -175,10 +175,11 @@
       "id": "glu",
       "nome": "GLU",
       "port": null,
-      "nota": "o Emscripten não tem GLU: precisa de uma implementação própria na receita",
+      "nota": "o Emscripten não tem GLU; existe no manifesto: acrescente \"glu\" (depois do \"gl4es\") em ajustes.externas",
       "cabecalhos": [
         "GL/glu.h"
-      ]
+      ],
+      "externa": "glu"
     },
     {
       "id": "glew",
