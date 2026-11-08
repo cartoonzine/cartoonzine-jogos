@@ -1,0 +1,7 @@
+emcc -flto -O3 -fno-rtti -fno-exceptions -Wno-write-strings `sdl2-config --cflags` -c sources/debug-report.cpp -o sources/debug-report.o
+sources/debug-report.cpp:5:10: fatal error: 'SDL_mixer.h' file not found
+    5 | #include "SDL_mixer.h"
+sources/demons.cpp:5:10: fatal error: 'SDL_mixer.h' file not found
+sources/gameaux.cpp:6:10: fatal error: 'SDL_image.h' file not found
+1 error generated.
+make: *** [Makefile:42: sources/debug-report.o] Error 1

@@ -1,0 +1,93 @@
+Run export RAIZ="$GITHUB_WORKSPACE" SAIDA="$GITHUB_WORKSPACE/saida/astromenace"
+  export RAIZ="$GITHUB_WORKSPACE" SAIDA="$GITHUB_WORKSPACE/saida/astromenace"
+  mkdir -p "$SAIDA" && mkdir -p /tmp/obra && cd /tmp/obra
+  bash -c ". '$RAIZ/receitas/astromenace.sh'"
+  test -f "$SAIDA/index.html"
+  du -sh "$SAIDA" && ls -la "$SAIDA"
+  shell: sh -e {0}
+configure: cmake -S . -B web -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS=-sUSE_SDL=2 -DCMAKE_CXX_FLAGS=-sUSE_SDL=2 "-DCMAKE_EXE_LINKER_FLAGS=-sALLOW_MEMORY_GROWTH=1 -sASYNCIFY -sUSE_SDL=2" -DCMAKE_TOOLCHAIN_FILE=/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_CROSSCOMPILING_EMULATOR=/emsdk/node/20.18.0_64bit/bin/node
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Could NOT find SDL2 (missing: SDL2_LIBRARY SDL2_INCLUDE_DIR) 
+-- Found OpenGL: /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/libGL.a   
+-- Found OpenAL: /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/libal.a  
+-- Could NOT find Freetype (missing: FREETYPE_LIBRARY FREETYPE_INCLUDE_DIRS) 
+-- CMAKE_CXX_FLAGS: -sUSE_SDL=2 -std=c++11 -fno-exceptions -fno-rtti -flto -O3 -I../include -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_FREETYPE -Wnon-virtual-dtor -Wshadow -Winit-self -Wcast-align -Winline -Wunreachable-code -Wmissing-include-dirs -Wmain -Wextra -Wall -Weffc++ -Wno-attributes -Wzero-as-null-pointer-constant
+Game data dir: /tmp/obra/fonte/gamedata/
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /tmp/obra/fonte/web
+[  1%] Building CXX object CMakeFiles/astromenace.dir/src/assets/audio.cpp.o
+[  2%] Building CXX object CMakeFiles/astromenace.dir/src/assets/model3d.cpp.o
+[  2%] Building CXX object CMakeFiles/astromenace.dir/src/assets/loading.cpp.o
+[  3%] Building CXX object CMakeFiles/astromenace.dir/src/assets/shader.cpp.o
+ports:INFO: retrieving port: ogg from https://github.com/emscripten-ports/ogg/archive/version_1.zip
+ports:INFO: unpacking port: ogg
+cache:INFO: generating system library: sysroot/lib/wasm32-emscripten/lto/libogg.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libogg.a" for subsequent builds)
+system_libs:INFO: compiled 2 inputs in 0.17s
+cache:INFO:  - ok
+ports:INFO: retrieving port: vorbis from https://github.com/emscripten-ports/vorbis/archive/version_1.zip
+ports:INFO: unpacking port: vorbis
+cache:INFO: generating system library: sysroot/lib/wasm32-emscripten/lto/libvorbis.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libvorbis.a" for subsequent builds)
+system_libs:INFO: compiled 22 inputs in 1.59s
+cache:INFO:  - ok
+ports:INFO: retrieving port: zlib from https://github.com/madler/zlib/archive/refs/tags/v1.2.13.tar.gz
+ports:INFO: unpacking port: zlib
+cache:INFO: generating port: sysroot/lib/wasm32-emscripten/lto/libz.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libz.a" for subsequent builds)
+system_libs:INFO: compiled 15 inputs in 0.89s
+cache:INFO:  - ok
+cache:INFO: generating port: sysroot/lib/wasm32-emscripten/lto/libSDL2.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libSDL2.a" for subsequent builds)
+system_libs:INFO: compiled 118 inputs in 8.14s
+cache:INFO:  - ok
+ports:INFO: retrieving port: sdl2_mixer from https://github.com/libsdl-org/SDL_mixer/archive/release-2.8.0.zip
+ports:INFO: unpacking port: sdl2_mixer
+cache:INFO: generating port: sysroot/lib/wasm32-emscripten/lto/libSDL2_mixer_ogg.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libSDL2_mixer_ogg.a" for subsequent builds)
+system_libs:INFO: compiled 34 inputs in 1.85s
+cache:INFO:  - ok
+ports:INFO: retrieving port: freetype from https://github.com/freetype/freetype/archive/VER-2-13-3.zip
+ports:INFO: unpacking port: freetype
+cache:INFO: generating port: sysroot/lib/wasm32-emscripten/lto/libfreetype.a... (this will be cached in "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto/libfreetype.a" for subsequent builds)
+system_libs:INFO: compiled 42 inputs in 4.39s
+cache:INFO:  - ok
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+[  4%] Building CXX object CMakeFiles/astromenace.dir/src/assets/texture.cpp.o
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+[  5%] Building CXX object CMakeFiles/astromenace.dir/src/command.cpp.o
+[  5%] Building CXX object CMakeFiles/astromenace.dir/src/config/config.cpp.o
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+[  6%] Building CXX object CMakeFiles/astromenace.dir/src/core/audio/audio.cpp.o
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+[  7%] Building CXX object CMakeFiles/astromenace.dir/src/core/audio/buffer.cpp.o
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+[  8%] Building CXX object CMakeFiles/astromenace.dir/src/core/audio/music.cpp.o
+clang++: warning: no such include directory: '../include' [-Wmissing-include-dirs]
+In file included from /tmp/obra/fonte/src/core/audio/audio.cpp:29:
+In file included from /tmp/obra/fonte/src/core/audio/buffer.h:38:
+/tmp/obra/fonte/src/core/audio/openal.h:47:10: fatal error: 'AL/alut.h' file not found
+   47 | #include "AL/alut.h"
+      |          ^~~~~~~~~~~
+1 error generated.
+gmake[2]: *** [CMakeFiles/astromenace.dir/build.make:174: CMakeFiles/astromenace.dir/src/core/audio/audio.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+In file included from /tmp/obra/fonte/src/core/audio/buffer.cpp:40:
+In file included from /tmp/obra/fonte/src/core/audio/buffer.h:38:
+/tmp/obra/fonte/src/core/audio/openal.h:47:10: fatal error: 'AL/alut.h' file not found
+   47 | #include "AL/alut.h"
+      |          ^~~~~~~~~~~
+1 error generated.
+gmake[2]: *** [CMakeFiles/astromenace.dir/build.make:188: CMakeFiles/astromenace.dir/src/core/audio/buffer.cpp.o] Error 1
+In file included from /tmp/obra/fonte/src/core/audio/music.cpp:44:
+In file included from /tmp/obra/fonte/src/core/audio/buffer.h:38:
+/tmp/obra/fonte/src/core/audio/openal.h:47:10: fatal error: 'AL/alut.h' file not found
+   47 | #include "AL/alut.h"
+      |          ^~~~~~~~~~~
+1 error generated.
+gmake[2]: *** [CMakeFiles/astromenace.dir/build.make:202: CMakeFiles/astromenace.dir/src/core/audio/music.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/astromenace.dir/all] Error 2
+gmake: *** [Makefile:136: all] Error 2
+Error: Process completed with exit code 2.

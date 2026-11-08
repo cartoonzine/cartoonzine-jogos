@@ -1,0 +1,4 @@
+/tmp/obra/fonte/src/core/logger_view.c:261:20: error: call to undeclared library function 'abs' with type 'int (int)'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+/tmp/obra/fonte/src/core/logger_view.c:261:41: note: include the header <stdlib.h> or explicitly provide a declaration for 'abs'
+1 error generated.
+gmake: *** [Makefile:101: all] Error 2
