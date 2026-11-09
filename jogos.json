@@ -26,6 +26,7 @@
     { "id": "cuphead", "nome": "Cuphead", "ano": 2025, "licenca": "sem licença", "fonte": "https://github.com/web-ports/cuphead", "original": "https://github.com/web-ports/cuphead", 
       "descricao": "", "controles": "teclado", "generos": [] },
     { "id": "gta3web", "nome": "GTA3Web", "ano": 2026, "licenca": "sem licença", "fonte": "https://github.com/woahhcrackers/GTA3Web", "original": "https://github.com/woahhcrackers/GTA3Web", 
-      "descricao": "webport of gta 3/gta iii by woahhcrackers", "controles": "teclado", "generos": [] }
+      "descricao": "webport of gta 3/gta iii by woahhcrackers", "controles": "teclado", "generos": [] },
+    { "id": "terraria", "nome": "Terraria", "ano": 2026, "licenca": "sem licença", "fonte": "https://github.com/web-ports/terraria/tree/main", "original": "https://github.com/web-ports/terraria", "commit": "47731568354ea43e84e73a99a9e63328351d7194", "descricao": "full credit mercury workshop", "controles": "gamepad", "generos": [], "ajustes": {"subdir":"","alvo":"","dados":[],"submodulos":false,"externas":[],"cmakePorts":[],"flagsCompilar":[],"flagsLinkar":[],"cmakeOpcoes":[],"configureOpcoes":[]}, "rascunho": true, "revisao": ["O repositório não tem licença: o código não é livre para publicar.", "Não achei CMakeLists.txt, configure.ac, meson.build nem Makefile (até 2 pastas de profundidade)."], "licencaDadosConfirmada": "2026-11-09" }
   ]
 }
