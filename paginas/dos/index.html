@@ -276,6 +276,7 @@
         const dentro = (t) => !!(t && t.nodeType === 1 && raiz.contains(t));
         ['keydown', 'keyup'].forEach((tipo) => window.addEventListener(tipo, (ev) => {
             if (dentro(ev.target)) return;                            // já é da área do jogo: o js-dos cuida
+            if (ev.key === 'Escape' && ev.isTrusted && window.__czAgente) return;   // no app o Esc do teclado é do app (sai da tela); o SELECT do controle (Esc) segue para o jogo
             const kc = paraDos(ev.keyCode || ev.which || 0);
             if (!kc) return;
             if (tipo === 'keydown') layers.fireKeyDown(kc); else layers.fireKeyUp(kc);
