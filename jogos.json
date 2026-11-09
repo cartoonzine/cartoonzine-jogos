@@ -26,7 +26,6 @@
     { "id": "cuphead", "nome": "Cuphead", "ano": 2025, "licenca": "sem licença", "fonte": "https://github.com/web-ports/cuphead", "original": "https://github.com/web-ports/cuphead", 
       "descricao": "", "controles": "teclado", "generos": [] },
     { "id": "gta3web", "nome": "GTA3Web", "ano": 2026, "licenca": "sem licença", "fonte": "https://github.com/woahhcrackers/GTA3Web", "original": "https://github.com/woahhcrackers/GTA3Web", 
-      "descricao": "webport of gta 3/gta iii by woahhcrackers", "controles": "teclado", "generos": [] },
-    { "id": "stardew-wasm", "nome": "Stardew Wasm", "ano": 2026, "licenca": "MIT", "fonte": "https://github.com/degloved-net/stardew-wasm/tree/main", "original": "https://github.com/degloved-net/stardew-wasm", "commit": "a664842611f09771f9155b9718046649bcaded33", "descricao": "port of https://store.steampowered.com/app/413150/Stardew_Valley/ to web", "controles": "gamepad", "generos": [], "ajustes": {"subdir":"","alvo":"","dados":[],"submodulos":false,"externas":[],"cmakePorts":[],"flagsCompilar":[],"flagsLinkar":[],"cmakeOpcoes":[],"configureOpcoes":[]}, "rascunho": true, "revisao": ["Não achei CMakeLists.txt, configure.ac, meson.build nem Makefile (até 2 pastas de profundidade)."], "licencaDadosConfirmada": "2026-11-08" }
+      "descricao": "webport of gta 3/gta iii by woahhcrackers", "controles": "teclado", "generos": [] }
   ]
 }
