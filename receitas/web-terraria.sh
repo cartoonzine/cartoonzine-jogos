@@ -9,5 +9,5 @@ git -C "$src" checkout --quiet "$commit"
 
 cd "$src"
 npm ci
-npm run build
+npm run build -- --target esnext
 cp -a dist/. "$SAIDA/"
