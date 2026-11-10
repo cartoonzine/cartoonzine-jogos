@@ -1,10 +1,13 @@
 . "$RAIZ/receitas/comum.sh"
 
-# Web-Terraria: aplicação web TypeScript compilada pelo Vite.
-# Requer Node.js 18+ e um navegador moderno com WebGL ou WebGPU.
+repo="https://github.com/cartoonzine/Web-Terraria.git"
+commit="716854657810089f3d977bd36c7a28e8a7a0201f"
+src="/tmp/obra/Web-Terraria"
 
+git clone --quiet "$repo" "$src"
+git -C "$src" checkout --quiet "$commit"
+
+cd "$src"
 npm ci
 npm run build
-
-# Servir a versão compilada para abrir no navegador.
-npm run preview -- --host 0.0.0.0 --port 4173 --strictPort
+cp -a dist/. "$SAIDA/"
