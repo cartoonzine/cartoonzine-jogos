@@ -1,4 +1,10 @@
 . "$RAIZ/receitas/comum.sh"
+
+# Instala CMake >= 4.2.0 e o prioriza no PATH usado pelo emcmake.
+python3 -m pip install --user 'cmake>=4.2.0'
+export PATH="$(python3 -m site --user-base)/bin:$PATH"
+cmake --version
+
 # 🧩 RECEITA CANDIDATA (Prateleira da Studio, só regras) — cmake
 # Código: https://github.com/gta-reversed/gta-reversed @ 49638dfd82ad82971e3d9621cb07b6b9d133e402. Só vira "pronta" depois que o workflow "Validar receita" passar.
 # Os ajustes ficam na ficha do jogo (jogos.json → "ajustes"); edite lá ou aqui e valide de novo.
