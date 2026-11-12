@@ -1,4 +1,4 @@
-const cacheName = 'neverball-1.6.0-1794464516';
+const cacheName = 'neverball-1.6.0-1794464939';
 
 const urls = [
   '/',
