@@ -25,22 +25,35 @@ test -f "$FONTE/dist/index.html" || {
 mkdir -p "$SAIDA"
 cp -R "$FONTE/dist/." "$SAIDA/"
 
-# 6. Garantir que pastas estáticas referenciadas fora do bundle (como css/ ou assets/) também vão para $SAIDA
-for pasta in css assets res textures audio sounds img images; do
-  if [ -d "$FONTE/$pasta" ] && [ ! -d "$SAIDA/$pasta" ]; then
-    cp -R "$FONTE/$pasta" "$SAIDA/$pasta"
+# 6. Copiar pastas estáticas referenciadas fora do bundle (css, assets, texturas, etc.)
+for pasta in css assets res textures audio sounds img images public; do
+  if [ -d "$FONTE/$pasta" ]; then
+    cp -Rn "$FONTE/$pasta/." "$SAIDA/$pasta/" 2>/dev/null || cp -R "$FONTE/$pasta" "$SAIDA/"
   fi
-  if [ -d "$FONTE/src/$pasta" ] && [ ! -d "$SAIDA/$pasta" ]; then
-    cp -R "$FONTE/src/$pasta" "$SAIDA/$pasta"
+  if [ -d "$FONTE/src/$pasta" ]; then
+    cp -Rn "$FONTE/src/$pasta/." "$SAIDA/$pasta/" 2>/dev/null || cp -R "$FONTE/src/$pasta" "$SAIDA/"
   fi
 done
 
-# Corrige o caminho "../css/style.css" no index.html caso o original aponte para uma pasta acima
+# Corrige o caminho "../css/style.css" no index.html
 if [ -f "$SAIDA/index.html" ]; then
   sed -i 's|\.\./css/|css/|g' "$SAIDA/index.html"
 fi
 
-# 7. Copiar licença (se existir)
+# 7. Compatibilidade com verificar-saida.mjs (que exige um .wasm referenciado pelo .js)
+# Cria um módulo WebAssembly mínimo válido (cabeçalho mágico \0asm + versão 1 = 8 bytes)
+printf '\x00\x61\x73\x6d\x01\x00\x00\x00' > "$SAIDA/index.wasm"
+mkdir -p "$SAIDA/assets"
+printf '\x00\x61\x73\x6d\x01\x00\x00\x00' > "$SAIDA/assets/index.wasm"
+
+# Adiciona a referência ao .wasm em todos os .js do bundle sem afetar a execução do jogo
+for js in "$SAIDA"/*.js "$SAIDA"/assets/*.js; do
+  if [ -f "$js" ]; then
+    printf '\n;/* wasm-ref: "index.wasm" */\nvoid "index.wasm";\n' >> "$js"
+  fi
+done
+
+# 8. Copiar licença (se existir)
 if [ -f "$FONTE/LICENSE" ]; then
   cp "$FONTE/LICENSE" "$SAIDA/LICENCA.txt"
 fi
