@@ -8,8 +8,9 @@
 Resultado:
     PASTA_DE_SAIDA/mame_capcom/sf2.zip, PASTA_DE_SAIDA/mame_snk/mslug.zip, …
     PASTA_DE_SAIDA/_sem-core/…      (BIOS/dispositivos que nenhum core lista, jogos que não são de arcade ou não funcionam)
-    PASTA_DE_SAIDA/lista-por-core.csv  (romset, core, arquivo: dá para importar no Cartoonzine Studio)
-Pastas de CHD (um diretório com o nome do romset) vão junto com o jogo.
+    PASTA_DE_SAIDA/lista-por-core.csv  (romset, core, arquivo, chd: dá para importar no Cartoonzine Studio)
+Pastas de CHD (um diretório com o nome do romset, ex.: sfiii/cap-sf3-3.chd) vão junto com o jogo, e os .chd entram
+na coluna "chd" da linha do jogo (o Studio põe no campo "Disco do jogo (CHD)" e o cartucho baixa junto).
 Usa o nucleos/mapa-romsets.json (gerado do MAME pelo gerar-plano.py): use ROMs da MESMA versão do MAME.
 """
 import csv
@@ -35,7 +36,10 @@ for p in itens:
     core = mapa.get(romset, '_sem-core')
     cont[core] += 1
     alvo = destino / core / p.name
-    linhas.append((romset, core, f'{core}/{p.name}'))
+    if p.is_file():
+        pasta = origem / romset            # CHDs do jogo: PASTA/<romset>/*.chd
+        discos = sorted(c.name for c in pasta.glob('*.chd')) if pasta.is_dir() else []
+        linhas.append((romset, core, f'{core}/{p.name}', ' '.join(f'{core}/{romset}/{c}' for c in discos)))
     if modo == 'simular' or alvo.exists():
         continue
     alvo.parent.mkdir(parents=True, exist_ok=True)
@@ -49,7 +53,7 @@ for p in itens:
 if modo != 'simular':
     destino.mkdir(parents=True, exist_ok=True)
     with open(destino / 'lista-por-core.csv', 'w', newline='', encoding='utf-8') as f:
-        w = csv.writer(f); w.writerow(['romset', 'core', 'arquivo']); w.writerows(linhas)
+        w = csv.writer(f); w.writerow(['romset', 'core', 'arquivo', 'chd']); w.writerows(linhas)
 print(f'MAME {dados["mame"]} · {len(itens)} itens em {origem} · modo: {modo}')
 for core, n in sorted(cont.items(), key=lambda x: -x[1]):
     print(f'  {core:24} {n:6}')

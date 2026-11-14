@@ -52,7 +52,13 @@ São **13.339 jogos de arcade** (contando as versões de cada jogo), tirados da 
   - *merged*: todas as versões dentro do .zip do pai → o app não tem como escolher qual versão abrir.
 - **BIOS**: alguns sistemas precisam de um .zip de BIOS além do jogo (ex.: `neogeo.zip` na SNK). Isso entra no app junto
   com o core da SNK.
-- **CHD** (disco, ex.: CPS3 `sfiii`): fica numa pasta com o nome do jogo; também fica para depois.
+- **CHD** (disco, ex.: CPS3 `sfiii`): funciona. O `separar-roms.py` leva a pasta `<romset>/` junto com o .zip e põe os
+  `.chd` na coluna `chd` do `lista-por-core.csv`. No Studio isso vira o campo "Disco do jogo (CHD) — MAME" (dá para
+  colar o link à mão também, ou colar os `.chd` junto com os `.zip`: o disco vai sozinho para o jogo cuja pasta tem o
+  mesmo nome). O app passa `&chd=` para o cartucho, que baixa o disco junto com o core, guarda no cache do aparelho e
+  grava em `/<romset>/<disco>.chd`, onde o MAME procura. Regras: o nome do arquivo tem que ser o do MAME
+  (`cap-sf3-3.chd`), da MESMA versão (0.289), hospedado num lugar que libere CORS como os .zip. O disco inteiro fica na
+  memória: jogos de CHD muito grande (GD-ROM de vários GB) não cabem num navegador/TV — melhor deixar "Só PC".
 - **Separar por core:** `python3 nucleos/separar-roms.py PASTA_DAS_ROMS PASTA_SAIDA --copiar` (ou `--mover`) cria uma pasta
   por core (`mame_capcom/`, `mame_snk/`…) e o `lista-por-core.csv` (romset → core). Sem `--copiar/--mover` ele só mostra.
 - **Link do jogo no Studio:** tem que terminar com o nome do romset (`…/sf2.zip`).
