@@ -52,7 +52,10 @@ São **13.339 jogos de arcade** (contando as versões de cada jogo), tirados da 
   - *merged*: todas as versões dentro do .zip do pai → o app não tem como escolher qual versão abrir.
 - **BIOS**: alguns sistemas precisam de um .zip de BIOS além do jogo (ex.: `neogeo.zip` na SNK). Isso entra no app junto
   com o core da SNK.
-- **CHD** (disco, ex.: CPS3 `sfiii`): fica numa pasta com o nome do jogo; também fica para depois.
+- **CHD** (disco, ex.: CPS3 `sfiii`): fica numa pasta com o nome do jogo e o `separar-roms.py` já leva junto com o .zip.
+  **Ainda não abre no app** (o cartucho manda um arquivo só). Próximo passo: o cartucho baixar o `.chd` junto pelo
+  `EJS_externalFiles` do EmulatorJS (no caminho onde o MAME procura), campo "Arquivo de disco (CHD)" no Studio e a
+  importação em massa/separador preenchendo esse campo. Afeta CPS3, Konami System 573, Naomi GD-ROM e outras placas com disco.
 - **Separar por core:** `python3 nucleos/separar-roms.py PASTA_DAS_ROMS PASTA_SAIDA --copiar` (ou `--mover`) cria uma pasta
   por core (`mame_capcom/`, `mame_snk/`…) e o `lista-por-core.csv` (romset → core). Sem `--copiar/--mover` ele só mostra.
 - **Link do jogo no Studio:** tem que terminar com o nome do romset (`…/sf2.zip`).
