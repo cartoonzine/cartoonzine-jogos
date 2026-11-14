@@ -1,8 +1,21 @@
-. "$RAIZ/receitas/comum.sh"
-# 🧩 RECEITA CANDIDATA (Prateleira da Studio, só regras) — desconhecido
-# Código: https://github.com/cartoonzine/Global-Strike @ 456b15f96e96e238b206262b96209aaf08568c93. Só vira "pronta" depois que o workflow "Validar receita" passar.
-# Os ajustes ficam na ficha do jogo (jogos.json → "ajustes"); edite lá ou aqui e valide de novo.
-# ⚠️ REVISÃO NECESSÁRIA:
-#   - Não achei CMakeLists.txt, configure.ac, meson.build nem Makefile (até 2 pastas de profundidade).
-echo "REVISAO: Não achei CMakeLists.txt, configure.ac, meson.build nem Makefile (até 2 pastas de profundidade)."
-exit 1
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${RAIZ:?Defina RAIZ como o diretório do repositório}"
+: "${SAIDA:?Defina SAIDA como o diretório de saída}"
+
+# Este repositório já contém o cliente web compilado.
+test -f "$RAIZ/index.html"
+test -f "$RAIZ/servers.json"
+test -d "$RAIZ/assets"
+
+mkdir -p "$SAIDA"
+cp "$RAIZ/index.html" "$RAIZ/servers.json" "$SAIDA/"
+cp -a "$RAIZ/assets" "$SAIDA/"
+
+# Confirma que o HTML e os recursos necessários foram empacotados.
+test -f "$SAIDA/assets/index-C0nTH1JV.js"
+test -f "$SAIDA/assets/index-BLkIhPSX.css"
+test -n "$(find "$SAIDA/assets" -maxdepth 1 -name '*.wasm' -print -quit)"
+
+echo "Cliente web do Global-Strike preparado em: $SAIDA"
