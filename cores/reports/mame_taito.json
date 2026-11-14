@@ -1,0 +1,1 @@
+{ "core": "mame_taito", "mame": "0.289", "fontes": "filtro 77 arquivos", "buildStart": "2026-11-14T05:37:50+00:00", "buildEnd": "2026-11-14T06:00:48+00:00", "options": { "defaultWebGL2": false } }
