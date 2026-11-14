@@ -14,7 +14,8 @@ FONTES="${FONTES:-}"
 if [ -z "$FONTES" ] && [ ! -f "$FILTRO" ]; then echo "sem filtro ($FILTRO) e sem FONTES"; exit 1; fi
 OBRA="${OBRA:-/tmp/obra-$ID}"
 MAME_REPO="${MAME_REPO:-https://github.com/libretro/mame.git}"
-MAME_REF="${MAME_REF:-master}"
+# versão fixa do MAME (nucleos.json → mame.ref, ex.: lrmame0289): as ROMs têm que ser da mesma versão do core
+MAME_REF="${MAME_REF:-$(python3 -c "import json;print(json.load(open('$AQUI/nucleos.json'))['mame'].get('ref','master'))" 2>/dev/null || echo master)}"
 JOBS="${JOBS:-$(nproc)}"
 mkdir -p "$OBRA" "$SAIDA/reports"
 INICIO="$(date -u -Is)"

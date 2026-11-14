@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       nucleo:
-        description: 'id do core, ex.: mame_snk (vazio = todos com "construir": true)'
+        description: 'id do core, ex.: mame_snk — vários: mame_konami,mame_sega (vazio = todos com "construir": true)'
         required: false
         default: ''
 
@@ -23,7 +23,8 @@ jobs:
       - id: l
         run: |
           so='${{ github.event.inputs.nucleo }}'
-          echo "nucleos=$(jq -c --arg so "$so" '[.nucleos[] | select(($so == "" and .construir == true) or .id == $so) | {id, nome}]' nucleos/nucleos.json)" >> "$GITHUB_OUTPUT"
+          # um id, vários separados por vírgula (mame_konami,mame_sega) ou vazio = todos com "construir": true
+          echo "nucleos=$(jq -c --arg so "$so" '($so | gsub(" "; "") | split(",") | map(select(. != ""))) as $ids | [.nucleos[] | select((($ids | length) == 0 and .construir == true) or (.id as $i | $ids | index($i)))] | map({id, nome})' nucleos/nucleos.json)" >> "$GITHUB_OUTPUT"
 
   nucleo:
     needs: lista
