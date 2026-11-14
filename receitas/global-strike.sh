@@ -1,25 +1,31 @@
-#!/usr/bin/env bash
+. "$RAIZ/receitas/comum.sh"
 set -euo pipefail
 
-: "${RAIZ:?Defina RAIZ como o diretório do repositório}"
-: "${SAIDA:?Defina SAIDA como o diretório de saída}"
+# RAIZ é o repositório da prateleira. O cliente do jogo está no repositório
+# Global-Strike e já vem compilado para a web.
+baixar_commit \
+  https://github.com/cartoonzine/Global-Strike.git \
+  456b15f96e96e238b206262b96209aaf08568c93
+FONTE=$(pwd)
 
-# Não há CMakeLists.txt, configure.ac, meson.build ou Makefile:
-# o jogo é um build web pré-compilado em assets/
 for arquivo in index.html servers.json; do
-  [[ -f "$RAIZ/$arquivo" ]] || {
-    echo "ERRO: arquivo obrigatório não encontrado: $RAIZ/$arquivo" >&2
+  [[ -f "$FONTE/$arquivo" ]] || {
+    echo "REVISAO: arquivo obrigatório não encontrado na fonte: $arquivo" >&2
     exit 1
   }
 done
-
-[[ -d "$RAIZ/assets" ]] || {
-  echo "ERRO: diretório obrigatório não encontrado: $RAIZ/assets" >&2
+[[ -d "$FONTE/assets" ]] || {
+  echo "REVISAO: diretório assets não encontrado na fonte" >&2
   exit 1
 }
 
 mkdir -p "$SAIDA"
-cp "$RAIZ/index.html" "$RAIZ/servers.json" "$SAIDA/"
-cp -a "$RAIZ/assets" "$SAIDA/"
+cp "$FONTE/index.html" "$FONTE/servers.json" "$SAIDA/"
+cp -a "$FONTE/assets" "$SAIDA/"
 
-echo "Cliente web do Global-Strike preparado em: $SAIDA"
+# O verificador procura os WASM na raiz da saída; o jogo continua com
+# os arquivos originais em assets/ para os caminhos definidos pelo cliente.
+find "$FONTE/assets" -maxdepth 1 -type f -name '*.wasm' -exec cp -t "$SAIDA" {} +
+
+test -s "$SAIDA/FONTE.txt"
+echo "Global-Strike web pronto em: $SAIDA"
