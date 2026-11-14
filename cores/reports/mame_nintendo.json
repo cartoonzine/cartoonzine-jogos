@@ -1,0 +1,1 @@
+{ "core": "mame_nintendo", "mame": "0.289", "fontes": "filtro 19 arquivos", "buildStart": "2026-11-14T05:41:54+00:00", "buildEnd": "2026-11-14T06:04:10+00:00", "options": { "defaultWebGL2": false } }
